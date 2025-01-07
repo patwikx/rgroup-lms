@@ -1,11 +1,9 @@
 import NextAuth from "next-auth"
-import { UserRole } from "@prisma/client";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 
 import { prisma } from "@/lib/db";
 import authConfig from "@/auth.config";
 import { getUserById } from "@/data/user";
-import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation";
 import { getAccountByUserId } from "./data/account";
 
 export const {
@@ -35,18 +33,7 @@ export const {
       const existingUser = await getUserById(user.id);
 
       // Prevent sign in without email verification
-      if (!existingUser?.emailVerified) return false;
-
-      if (existingUser.isTwoFactorEnabled) {
-        const twoFactorConfirmation = await getTwoFactorConfirmationByUserId(existingUser.id);
-
-        if (!twoFactorConfirmation) return false;
-
-        // Delete two factor confirmation for next sign in
-        await prisma.twoFactorConfirmation.delete({
-          where: { id: twoFactorConfirmation.id }
-        });
-      }
+      if (!existingUser?.emailVerified) return true;
 
       return true;
     },
@@ -55,23 +42,13 @@ export const {
         session.user.id = token.sub;
       }
 
-      if (token.role && session.user) {
-        session.user.role = token.role as UserRole;
-      }
-
-      if (session.user) {
-        session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
-      }
-
       if (session.user) {
         session.user.name = token.name;
         session.user.firstName = token.firstName as string;
         session.user.lastName = token.lastName as string;
         session.user.id = token.id as string;
-        session.user.approverId = token.approverId as string;
-        session.user.pmdId = token.pmdId as string;
         session.user.email = token.email;
-        session.user.isOAuth = token.isOAuth as boolean;
+        session.user.role = token.role as string;
       }
 
       return session;
@@ -86,16 +63,11 @@ export const {
       const existingAccount = await getAccountByUserId(
         existingUser.id
       );
-
       token.isOAuth = !!existingAccount;
-      token.firstName = existingUser.firstName;
-      token.lastName = existingUser.lastName;
+      token.firstName = existingUser.name;
       token.id = existingUser.id;
-      token.approverId = existingUser.approverId;
       token.email = existingUser.email;
       token.role = existingUser.role;
-      token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
-
       return token;
     }
   },

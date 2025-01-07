@@ -1,7 +1,7 @@
 // prisma/schema.prisma
 datasource db {
   provider  = "postgresql"
-  url  	    = env("DATABASE_URL")
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -9,177 +9,178 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum UserRole {
-  Administrator
-  Approver
-  User
-  PMD
-}
-
-enum Months {
-  January
-  February
-  March
-  April
-  May
-  June
-  July
-  August
-  September
-  October
-  November
-  December
-}
-
-enum Periods {
-  FirstHalf
-  SecondHalf
-}
-
-enum PlsType {
-  Official
-  Personal
-  Leave
-}
-
-enum DayType {
-  HalfDay
-  WholeDay
-}
-
-enum Statuses {
-  Approved
-  Pending
-  Declined
-}
-model User {
-  id            String    @id @default(cuid())
-  firstName     String
-  lastName      String
-  contactNo     String?
-  address       String?
-  email         String   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          UserRole? @default(User)
-  department    String?
-  leaveBalance  String?
-  accounts      Account[]
-  isTwoFactorEnabled Boolean @default(false)
-  twoFactorConfirmation TwoFactorConfirmation?
-  createdAt     DateTime @default(now())
-  deletedAt     DateTime?
-  updatedAt     DateTime @updatedAt
-  leave         Leave[] @relation("UserToLeave")
-  forApprovalLeaves Leave[] @relation("ApproverToLeave")
-  approverId    String?
-  payslip       Payslip[] @relation("UserToPayslip")
-}
-
-
-
-model Department {
-  id          String @id @default(cuid()) @unique
-  name        String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedBy   String?
-  deletedAt   DateTime?
-}
-
-
-model Payslip {
-  id          String @id @default(cuid()) @unique
-  payslipFile String
-  months      Months
-  periods     Periods
-  userId      String
-  user        User @relation("UserToPayslip",fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
-}
-
-model Leave {
-  id          String @id @default(cuid()) @unique
-  leaveType   String
-  startDate   String
-  endDate     String
-  reason      String
-  numberOfDays String?
-  approverRemarks String?
-  pmdRemarks  String?
-  dayType     DayType?
-  status      Statuses @default(Pending)
-  pmdStatus   Statuses? @default(Pending)
-  createdAt   DateTime @default(now())
-  userId      String
-  user        User @relation("UserToLeave", fields: [userId], references: [id])
-  approverId  String
-  approver    User? @relation("ApproverToLeave", fields: [approverId], references: [id])
-}
-
-model LeaveType {
-  id          String @id @default(cuid()) @unique
-  name        String
-  description String?
-  createdAt   DateTime @default(now())
-}
-
+// Next-auth related models remain the same
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
 }
 
-model VerificationToken {
-  id String @id @default(cuid())
-  email String
-  token String @unique
-  expires DateTime
-
-  @@unique([email, token])
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model PasswordResetToken {
-  id String @id @default(cuid())
-  email String
-  token String @unique
-  expires DateTime
-
-  @@unique([email, token])
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String        @unique
+  password      String
+  role          ApprovalLevel @default(USER)
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  employee      Employee?
 }
 
-model TwoFactorToken {
-  id String @id @default(cuid())
-  email String
-  token String @unique
-  expires DateTime
+// Leave Management System models
+model Employee {
+  id          String   @id @default(cuid())
+  empId       String   @unique
+  firstName   String
+  lastName    String
+  email       String   @unique
+  department  String
+  position    String
+  joiningDate DateTime @default(now())
+  isActive    Boolean  @default(true)
+  isManager   Boolean  @default(false)
+  isHR        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@unique([email, token])
+  user User @relation(fields: [empId], references: [id], onDelete: Cascade)
+
+  leaveBalances LeaveBalance[]
+  leaveRequests LeaveRequest[]
+  approverFor   LeaveApprover[] @relation("Approver")
+  hasApprovers  LeaveApprover[] @relation("Employee")
+  approvals     LeaveApproval[]
 }
 
-model TwoFactorConfirmation {
-  id String @id @default(cuid())
+model LeaveType {
+  id                 String   @id @default(cuid())
+  name               String   @unique
+  description        String?
+  annualAllowance    Decimal  @db.Decimal(5, 1)
+  requiresApproval   Boolean  @default(true)
+  isPaid             Boolean  @default(true)
+  minNoticeDays      Int      @default(0)
+  maxConsecutiveDays Int?
+  allowsHalfDay      Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId])
+  leaveBalances LeaveBalance[]
+  leaveRequests LeaveRequest[]
 }
 
-model Board {
-  id String @id @default(cuid())
-  title String
+model LeaveBalance {
+  id          String   @id @default(cuid())
+  employeeId  String
+  leaveTypeId String
+  year        Int
+  balance     Decimal  @default(0) @db.Decimal(5, 1)
+  used        Decimal  @default(0) @db.Decimal(5, 1)
+  pending     Decimal  @default(0) @db.Decimal(5, 1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  employee  Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([employeeId, leaveTypeId, year])
 }
 
+model LeaveRequest {
+  id              String      @id @default(cuid())
+  employeeId      String
+  leaveTypeId     String
+  startDate       DateTime    @db.Date
+  endDate         DateTime    @db.Date
+  leaveDay        LeaveDay    @default(FULL)
+  daysRequested   Decimal     @db.Decimal(5, 1)
+  status          LeaveStatus @default(PENDING)
+  reason          String
+  rejectionReason String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  employee  Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leaveType LeaveType       @relation(fields: [leaveTypeId], references: [id])
+  approvals LeaveApproval[]
+
+  @@index([status])
+}
+
+model LeaveApproval {
+  id             String         @id @default(cuid())
+  leaveRequestId String
+  approverId     String
+  level          ApprovalLevel
+  status         ApprovalStatus @default(PENDING)
+  comment        String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  leaveRequest LeaveRequest @relation(fields: [leaveRequestId], references: [id], onDelete: Cascade)
+  approver     Employee     @relation(fields: [approverId], references: [id])
+
+  @@unique([leaveRequestId, level])
+}
+
+model LeaveApprover {
+  id            String        @id @default(cuid())
+  employeeId    String
+  approverId    String
+  approvalLevel ApprovalLevel @default(SUPERVISOR)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  employee Employee @relation("Employee", fields: [employeeId], references: [id], onDelete: Cascade)
+  approver Employee @relation("Approver", fields: [approverId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, approverId])
+}
+
+enum LeaveDay {
+  FULL
+  FIRST_HALF
+  SECOND_HALF
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ApprovalLevel {
+  SUPERVISOR
+  HR
+  USER
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

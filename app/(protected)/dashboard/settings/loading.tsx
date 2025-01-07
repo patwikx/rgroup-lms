@@ -1,7 +1,7 @@
 import Loading from '@/components/loading'
 import React from 'react'
 
-const LoadingSettings = () => {
+const LoadingTaskManager = () => {
   return (
     <div className="h-screen w-screen flex justify-center items-center">
       <Loading></Loading>
@@ -9,4 +9,4 @@ const LoadingSettings = () => {
   )
 }
 
-export default LoadingSettings
+export default LoadingTaskManager

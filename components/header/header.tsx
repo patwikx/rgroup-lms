@@ -55,7 +55,7 @@ export function Header () {
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
                 >
                   <ClipboardListIcon className="h-5 w-5" />
-                  Leave Management
+                  For Approval
                 </Link>
                 <Link
                   href="#"
@@ -112,6 +112,7 @@ export function Header () {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">{user?.firstName} {user?.lastName}</p>
+            
             <p className="text-xs leading-none text-muted-foreground">
               {user?.email}
             </p>

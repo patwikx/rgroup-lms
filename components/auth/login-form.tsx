@@ -3,7 +3,7 @@
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 
@@ -22,7 +22,6 @@ import { Button } from "@/components/ui/button";
 import { FormError } from "@/components/form-error";
 import { FormSuccess } from "@/components/form-success";
 import { login } from "@/actions/login";
-import { useCurrentUser } from "@/hooks/use-current-user";
 
 
 export const LoginForm = () => {
@@ -45,9 +44,6 @@ export const LoginForm = () => {
     },
   });
 
-  const router = useRouter();
-  const currentUser = useCurrentUser();
-
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
@@ -59,10 +55,6 @@ export const LoginForm = () => {
             form.reset();
             setError(data.error);
           }
-  
-          if (data?.twoFactor) {
-            setShowTwoFactor(true);
-          }
         })
         .catch(() => setError("Something went wrong"));
     });
@@ -70,7 +62,7 @@ export const LoginForm = () => {
 
   return (
     <CardWrapper
-      headerLabel="Welcome back"
+      headerLabel=""
       backButtonLabel="Don't have an account? Contact MIS Department."
       backButtonHref=""
 
@@ -81,25 +73,6 @@ export const LoginForm = () => {
           className="space-y-6"
         >
           <div className="space-y-4">
-            {showTwoFactor && (
-              <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Two Factor Code</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={isPending}
-                        placeholder="123456"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
             {!showTwoFactor && (
               <>
                 <FormField
@@ -112,7 +85,7 @@ export const LoginForm = () => {
                         <Input
                           {...field}
                           disabled={isPending}
-                          placeholder="john.doe@example.com"
+                          placeholder="email@example.com"
                           type="email"
                         />
                       </FormControl>

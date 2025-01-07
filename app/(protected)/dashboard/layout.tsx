@@ -1,32 +1,43 @@
-import { auth } from '@/auth';
+import { redirect } from 'next/navigation'
+
+import { auth } from '@/auth'
+import { prisma } from "@/lib/db";
+
+import { Toaster } from '@/components/ui/toaster'
 import Header from '@/components/header/header';
-import { SessionProvider } from 'next-auth/react';
-import { Inter } from 'next/font/google';
-import React from 'react';
-import { Toaster } from 'sonner';
+
+export const metadata = {
+  title: 'RD Group LMS',
+  description: 'RD Group Leave Management System',
+}
 
 
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const session = await auth()
 
-const inter = Inter({ subsets: ['latin'] })
+  if (!session?.user) {
+    redirect('/')
+  }
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: session.user.id
+    }
+ 
+  })
 
-  const session = await auth();
-
+  if (!user) {
+    redirect('/')
+  }
   return (
-    <SessionProvider session={session}>
-      <div>
-      <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} w-full h-full`}>
-        <div>
-        <Header />
-        <Toaster />
-        {children}
-        </div>
-      </body>
-    </html>
-      </div>
-    
-    </SessionProvider>
-  );
+    <>
+    <Header />
+      {children}
+      <Toaster />
+    </>
+  )
 }

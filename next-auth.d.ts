@@ -5,11 +5,10 @@ export type ExtendedUser = DefaultSession["user"] & {
   id: string;
   firstName: string;
   lastName: string;
-  approverId: string;
-  pmdId: string;
-  deptId: string;
-  role: UserRole;
-  isTwoFactorEnabled: boolean;
+  role: string;
+  isHR: boolean;
+  isManager: boolean;
+
   isOAuth: boolean;
 };
 

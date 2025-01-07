@@ -55,7 +55,7 @@ export function SideBarNav() {
                   className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-foreground hover:text-foreground hover:bg-muted"
                 >
                   <CalendarCheck className="h-5 w-5" />
-                  Leave Management
+                  For Approval
                 </Link>
                 <Link
                   href="/dashboard/employee-management"

@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend('re_fKP8CSMg_DmD6CPqAd4gepPZ8Jmdys7KZ');
 
 const domain = process.env.NEXT_PUBLIC_APP_URL;
 

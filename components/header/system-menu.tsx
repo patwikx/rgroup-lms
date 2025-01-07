@@ -32,10 +32,8 @@ export function SystemMenu() {
 
   const user = useCurrentUser();
 
-  const isAdmin = user?.role === 'Administrator';
-  const isUser = user?.role === 'User';
-  const isPMD = user?.role === 'PMD';
-  const isApprover = user?.role === 'Approver';
+  const isApprover = user?.role === 'SUPERVISOR';
+  const isHR = user?.role === 'HR';
 
   return (
     <NavigationMenu>
@@ -44,35 +42,47 @@ export function SystemMenu() {
         <TeamSwitcher />
         </NavigationMenuItem>
         <NavigationMenuItem className="ml-4">
-          <Link href="/dashboard/leave" legacyBehavior passHref>
+          <Link href="/dashboard/pending-requests" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <CalendarCheck className="h-4 w-4 mr-2"/>Leave Management
+              <FileTextIcon className="h-4 w-4 mr-2"/>Pending Leave Requests
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
-        {(isAdmin || isPMD) && (
+        {(isApprover && 
         <NavigationMenuItem>
-        <Link href="/dashboard/employee-management" legacyBehavior passHref>
+        <Link href="/dashboard/approvals" legacyBehavior passHref>
           <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-            <Users2Icon className="h-4 w-4 mr-2"/>Employee Management
+            <CalendarCheck className="h-4 w-4 mr-2"/>For Approval
           </NavigationMenuLink>
         </Link>
       </NavigationMenuItem>
-          )}
+      )}
+      
           <NavigationMenuItem>
-          <Link href="/dashboard/payslip" legacyBehavior passHref>
+          <Link href="/dashboard/leave-history" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <FileTextIcon className="h-4 w-4 mr-2"/>View Payslip
+              <FileTextIcon className="h-4 w-4 mr-2"/>Leave History
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
+        {(isHR &&
         <NavigationMenuItem>
-          <Link href="/dashboard/kanban" legacyBehavior passHref>
+          <Link href="/dashboard/employee" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <FaTasks className="h-4 w-4 mr-2"/>Kanban Board
+              <FileTextIcon className="h-4 w-4 mr-2"/>Employee Management
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
+        )}
+        {(isHR &&
+        <NavigationMenuItem>
+          <Link href="/dashboard/pmd-approval" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <FileTextIcon className="h-4 w-4 mr-2"/>PMD - For Approval
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+        )}
         <NavigationMenuItem>
           <Link href="/dashboard/settings" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>

@@ -3,7 +3,7 @@
 import React from 'react';
 import Head from 'next/head';
 
-const UnderConstruction: React.FC = () => {
+const UnderConstructionLeaveHistory: React.FC = () => {
   return (
     <>
       <Head>
@@ -81,4 +81,4 @@ const UnderConstruction: React.FC = () => {
   );
 };
 
-export default UnderConstruction;
+export default UnderConstructionLeaveHistory;
