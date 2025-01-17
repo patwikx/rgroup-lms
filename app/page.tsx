@@ -1,9 +1,4 @@
 import { LoginForm } from "@/components/auth/login-form";
-import { EmployeeRegistrationForm } from "@/components/registration/employee-form";
-import LeaveRequestPage from "./(protected)/dashboard/leave-request/page";
-
-
-
 
 export default function Home() {
   return (
