@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,7 @@ import { Approver } from "@/types/type";
 import { EmployeeFormFields } from "./employee-form-fields";
 import { EmployeeFormData, EmployeeSchema } from "@/schemas";
 import { createEmployee } from "@/actions/employee";
+import { ApprovalLevel } from "@prisma/client";
 
 export function EmployeeRegistrationDialog() {
   const [open, setOpen] = useState(false);
@@ -35,8 +36,8 @@ export function EmployeeRegistrationDialog() {
       position: "",
       isManager: false,
       isHR: false,
-      supervisorId: "",
-      role: "USER",
+      supervisorId: undefined,
+      role: ApprovalLevel.USER,
     },
   });
 
@@ -47,11 +48,11 @@ export function EmployeeRegistrationDialog() {
   // Update role when checkboxes change
   useEffect(() => {
     if (isHR) {
-      form.setValue("role", "HR");
+      form.setValue("role", ApprovalLevel.HR);
     } else if (isManager) {
-      form.setValue("role", "SUPERVISOR");
+      form.setValue("role", ApprovalLevel.SUPERVISOR);
     } else {
-      form.setValue("role", "USER");
+      form.setValue("role", ApprovalLevel.USER);
     }
   }, [isHR, isManager, form]);
 
@@ -106,3 +107,4 @@ export function EmployeeRegistrationDialog() {
     </Dialog>
   );
 }
+

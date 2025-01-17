@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: 'Manage system users and their access',
 };
 
+export const revalidate = 0;
+
 export default async function UsersPage() {
   const users = await getUsers();
   

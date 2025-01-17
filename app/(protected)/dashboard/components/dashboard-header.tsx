@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { CalendarDays } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function DashboardHeader() {
@@ -15,7 +16,7 @@ export function DashboardHeader() {
         </p>
       </div>
       <Button onClick={() => router.push('/dashboard/leave-request')}>
-        New Leave Request
+        <CalendarDays className='h-4 w-4 mr-2' />New Leave Request
       </Button>
     </div>
   );

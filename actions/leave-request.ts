@@ -15,17 +15,15 @@ export async function createLeaveRequest(data: FormData) {
 
     const employee = await prisma.employee.findFirst({
       where: { empId: session.user.id },
-      include: {
-        hasApprovers: {
-          include: {
-            approver: true
-          }
-        }
-      }
+      include: { approver: true }, // Include the approver information
     });
 
     if (!employee) {
       return { success: false, error: "Employee not found" };
+    }
+
+    if (!employee.approverId) {
+      return { success: false, error: "No approver assigned to this employee" };
     }
 
     const rawData = {
@@ -73,15 +71,6 @@ export async function createLeaveRequest(data: FormData) {
       return { success: false, error: "Insufficient leave balance" };
     }
 
-    // Get supervisor approver
-    const supervisorApprover = employee.hasApprovers.find(
-      a => a.approvalLevel === ApprovalLevel.SUPERVISOR
-    );
-
-    if (!supervisorApprover) {
-      return { success: false, error: "No supervisor assigned" };
-    }
-
     // Create leave request and update balance in a transaction
     const [leaveRequest] = await prisma.$transaction([
       // Create leave request with initial supervisor approval
@@ -96,12 +85,14 @@ export async function createLeaveRequest(data: FormData) {
           reason: fields.reason,
           status: LeaveStatus.PENDING,
           approvals: {
-            create: {
-              approverId: supervisorApprover.approverId,
-              level: ApprovalLevel.SUPERVISOR,
-              status: ApprovalStatus.PENDING
-            }
-          }
+            create: [
+              {
+                approverId: employee.approverId,
+                level: employee.approver?.approvalLevel || ApprovalLevel.SUPERVISOR,
+                status: ApprovalStatus.PENDING,
+              },
+            ],
+          },
         },
         include: {
           approvals: true

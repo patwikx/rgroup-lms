@@ -29,13 +29,21 @@ export async function createEmployee(data: EmployeeFormData) {
 
     const hashedPassword = await bcrypt.hash(fields.password, 12);
     
+    // Determine the approval level
+    let approvalLevel: ApprovalLevel = ApprovalLevel.USER;
+    if (fields.isHR) {
+      approvalLevel = ApprovalLevel.HR;
+    } else if (fields.isManager) {
+      approvalLevel = ApprovalLevel.SUPERVISOR;
+    }
+
     // Create user
     const user = await prisma.user.create({
       data: {
         name: `${fields.firstName} ${fields.lastName}`,
         email: fields.email,
         password: hashedPassword,
-        role: fields.role === "HR" ? "HR" : fields.role === "SUPERVISOR" ? "SUPERVISOR" : "USER",
+        role: approvalLevel,
       },
     });
 
@@ -50,18 +58,9 @@ export async function createEmployee(data: EmployeeFormData) {
         position: fields.position,
         isManager: fields.isManager,
         isHR: fields.isHR,
+        approvalLevel: approvalLevel,
+        approverId: fields.supervisorId || null, // Add this line to set the approverId
       },
-    });
-
-    // Create leave approvers
-    await prisma.leaveApprover.createMany({
-      data: [
-        {
-          employeeId: employee.id,
-          approverId: fields.supervisorId,
-          approvalLevel: ApprovalLevel.SUPERVISOR,
-        },
-      ],
     });
 
     // Create initial leave balances

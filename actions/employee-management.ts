@@ -3,22 +3,25 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/db';
 import { hash } from 'bcryptjs';
+import { ApprovalLevel } from '@prisma/client';
 
 export async function getUsers() {
   try {
     const users = await prisma.user.findMany({
+      orderBy: { updatedAt: 'asc' },
       include: {
         employee: {
           include: {
-            hasApprovers: {
-              include: {
-                approver: true
+            approver: {
+              select: {
+                firstName: true,
+                lastName: true,
+                position: true
               }
             }
           }
-        },
-      },
-        orderBy: { updatedAt: 'asc' }
+        }
+      }
     });
     return users;
   } catch (error) {
@@ -31,7 +34,9 @@ export async function getAvailableApprovers(employeeId: string) {
     const approvers = await prisma.employee.findMany({
       where: {
         isActive: true,
-        isManager: true,
+        approvalLevel: {
+          in: [ApprovalLevel.SUPERVISOR, ApprovalLevel.HR]
+        },
         id: {
           not: employeeId // Exclude the current employee
         }
@@ -40,7 +45,8 @@ export async function getAvailableApprovers(employeeId: string) {
         id: true,
         firstName: true,
         lastName: true,
-        position: true
+        position: true,
+        approvalLevel: true
       }
     });
     return approvers;
@@ -57,54 +63,38 @@ export async function updateUserDetails(
     email: string;
     department: string;
     position: string;
-    approverId?: string;
+    approverId?: string | null;
+    approvalLevel: ApprovalLevel;
   }
 ) {
-  const { firstName, lastName, email, department, position, approverId } = data;
+  const { firstName, lastName, email, department, position, approverId, approvalLevel } = data;
 
   try {
     await prisma.$transaction(async (tx) => {
-      // Update user and employee details
+      // Update user details
       await tx.user.update({
         where: { id: userId },
         data: {
           email,
-          employee: {
-            update: {
-              firstName,
-              lastName,
-              email,
-              department,
-              position,
-            },
-          },
+          role: approvalLevel,
         },
       });
 
-      if (approverId) {
-        // Get the employee record
-        const employee = await tx.employee.findFirst({
-          where: { empId: userId },
-        });
-
-        if (employee) {
-          // Update or create the approver relationship
-          await tx.leaveApprover.upsert({
-            where: {
-              employeeId_approverId: {
-                employeeId: employee.id,
-                approverId: approverId,
-              },
-            },
-            create: {
-              employeeId: employee.id,
-              approverId: approverId,
-              approvalLevel: 'SUPERVISOR',
-            },
-            update: {},
-          });
-        }
-      }
+      // Update employee details
+      await tx.employee.update({
+        where: { empId: userId },
+        data: {
+          firstName,
+          lastName,
+          email,
+          department,
+          position,
+          approverId,
+          approvalLevel,
+          isManager: approvalLevel === ApprovalLevel.SUPERVISOR,
+          isHR: approvalLevel === ApprovalLevel.HR,
+        },
+      });
     });
 
     revalidatePath('/dashboard/employee-management');

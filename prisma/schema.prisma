@@ -72,9 +72,14 @@ model Employee {
 
   leaveBalances LeaveBalance[]
   leaveRequests LeaveRequest[]
-  approverFor   LeaveApprover[] @relation("Approver")
-  hasApprovers  LeaveApprover[] @relation("Employee")
   approvals     LeaveApproval[]
+
+  // New fields for many-to-one approver relationship
+  approverId   String?
+  approver     Employee?  @relation("EmployeeApprover", fields: [approverId], references: [id])
+  subordinates Employee[] @relation("EmployeeApprover")
+
+  approvalLevel ApprovalLevel @default(SUPERVISOR)
 }
 
 model LeaveType {
@@ -148,20 +153,6 @@ model LeaveApproval {
   approver     Employee     @relation(fields: [approverId], references: [id])
 
   @@unique([leaveRequestId, level])
-}
-
-model LeaveApprover {
-  id            String        @id @default(cuid())
-  employeeId    String
-  approverId    String
-  approvalLevel ApprovalLevel @default(SUPERVISOR)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  employee Employee @relation("Employee", fields: [employeeId], references: [id], onDelete: Cascade)
-  approver Employee @relation("Approver", fields: [approverId], references: [id], onDelete: Cascade)
-
-  @@unique([employeeId, approverId])
 }
 
 enum LeaveDay {

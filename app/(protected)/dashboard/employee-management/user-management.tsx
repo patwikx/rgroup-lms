@@ -23,21 +23,7 @@ import { PasswordChangeForm } from './password-change-form';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import {
-  MoreVertical,
-  Edit,
-  Key,
-  UserX,
-  UserCheck,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Loader2,
-  Search,
-  FileSpreadsheet,
-  Printer
-} from 'lucide-react';
+import { MoreVertical, Edit, Key, UserX, UserCheck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2, Search, FileSpreadsheet, Printer } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,13 +42,12 @@ interface Employee {
   department: string;
   position: string;
   isActive: boolean;
-  hasApprovers?: Array<{
-    approver: {
-      firstName: string;
-      lastName: string;
-      position: string;
-    };
-  }>;
+  approver: {
+    firstName: string;
+    lastName: string;
+    position: string;
+  } | null;
+  approvalLevel: string;
 }
 
 interface User {
@@ -111,10 +96,11 @@ export function UserManagement({ initialUsers }: Props) {
       'Email': user.email,
       'Department': user.employee?.department,
       'Position': user.employee?.position,
-      'Approver': user.employee?.hasApprovers?.[0]?.approver 
-        ? `${user.employee.hasApprovers[0].approver.firstName} ${user.employee.hasApprovers[0].approver.lastName}`
+      'Approver': user.employee?.approver 
+        ? `${user.employee.approver.firstName} ${user.employee.approver.lastName}`
         : 'No approver assigned',
-      'Status': user.employee?.isActive ? 'Active' : 'Inactive'
+      'Status': user.employee?.isActive ? 'Active' : 'Inactive',
+      'Approval Level': user.employee?.approvalLevel
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -169,9 +155,6 @@ export function UserManagement({ initialUsers }: Props) {
                   <td>${user.email}</td>
                   <td>${user.employee?.department}</td>
                   <td>${user.employee?.position}</td>
-                  <td>${user.employee?.hasApprovers?.[0]?.approver 
-                    ? `${user.employee.hasApprovers[0].approver.firstName} ${user.employee.hasApprovers[0].approver.lastName}`
-                    : 'No approver assigned'}</td>
                   <td>${user.employee?.isActive ? 'Active' : 'Inactive'}</td>
                 </tr>
               `).join('')}
@@ -270,28 +253,28 @@ export function UserManagement({ initialUsers }: Props) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentUsers.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
-                  {user.employee?.firstName} {user.employee?.lastName}
-                </TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.employee?.department}</TableCell>
-                <TableCell>{user.employee?.position}</TableCell>
-                <TableCell>
-                  {user.employee?.hasApprovers?.[0]?.approver ? (
-                    `${user.employee.hasApprovers[0].approver.firstName} ${user.employee.hasApprovers[0].approver.lastName}`
-                  ) : (
-                    'No approver assigned'
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={user.employee?.isActive ? "success" : "destructive"}
-                  >
-                    {user.employee?.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
-                </TableCell>
+  {currentUsers.map((user) => (
+    <TableRow key={user.id}>
+      <TableCell>
+        {user.employee?.firstName} {user.employee?.lastName}
+      </TableCell>
+      <TableCell>{user.email}</TableCell>
+      <TableCell>{user.employee?.department}</TableCell>
+      <TableCell>{user.employee?.position}</TableCell>
+      <TableCell>
+        {user.employee?.approver ? (
+          `${user.employee.approver.firstName} ${user.employee.approver.lastName} (${user.employee.approver.position})`
+        ) : (
+          'No approver assigned'
+        )}
+      </TableCell>
+      <TableCell>
+        <Badge 
+          variant={user.employee?.isActive ? "success" : "destructive"}
+        >
+          {user.employee?.isActive ? 'Active' : 'Inactive'}
+        </Badge>
+      </TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -428,3 +411,4 @@ export function UserManagement({ initialUsers }: Props) {
     </Card>
   );
 }
+
