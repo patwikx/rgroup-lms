@@ -207,7 +207,7 @@ export function UserManagement({ initialUsers }: Props) {
 <div>
 
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex justify-between mb-4">
           
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
