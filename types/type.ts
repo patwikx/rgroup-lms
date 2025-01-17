@@ -1,4 +1,4 @@
-import { Employee, LeaveApproval, LeaveRequest, LeaveType } from '@prisma/client';
+import { ApprovalLevel, ApprovalStatus, Employee, LeaveApproval, LeaveDay, LeaveRequest, LeaveStatus, LeaveType } from '@prisma/client';
 import { LucideIcon } from 'lucide-react';
 import { ReactNode } from 'react';
 
@@ -42,5 +42,29 @@ export type PendingApprovalWithDetails = LeaveApproval & {
     approvals: (LeaveApproval & {
       approver: Employee;
     })[];
+  };
+};
+
+export type PendingApprovalWithDetailsPMD = {
+  id: string;
+  leaveRequest: {
+    id: string;
+    employee: Employee;
+    leaveType: {
+      id: string;
+      name: string;
+      isPaid: boolean;
+    };
+    startDate: Date;
+    endDate: Date;
+    leaveDay: LeaveDay;
+    daysRequested: { toString: () => string };
+    reason: string;
+    status: LeaveStatus;
+    approvals: {
+      id: string;
+      level: ApprovalLevel;
+      status: ApprovalStatus;
+    }[];
   };
 };

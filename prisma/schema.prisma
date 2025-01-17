@@ -48,23 +48,25 @@ model User {
   accounts      Account[]
   sessions      Session[]
   employee      Employee?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime?     @updatedAt
 }
 
 // Leave Management System models
 model Employee {
-  id          String   @id @default(cuid())
-  empId       String   @unique
+  id          String    @id @default(cuid())
+  empId       String    @unique
   firstName   String
   lastName    String
-  email       String   @unique
+  email       String    @unique
   department  String
   position    String
-  joiningDate DateTime @default(now())
-  isActive    Boolean  @default(true)
-  isManager   Boolean  @default(false)
-  isHR        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  joiningDate DateTime  @default(now())
+  isActive    Boolean   @default(true)
+  isManager   Boolean   @default(false)
+  isHR        Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
 
   user User @relation(fields: [empId], references: [id], onDelete: Cascade)
 
@@ -110,18 +112,20 @@ model LeaveBalance {
 }
 
 model LeaveRequest {
-  id              String      @id @default(cuid())
-  employeeId      String
-  leaveTypeId     String
-  startDate       DateTime    @db.Date
-  endDate         DateTime    @db.Date
-  leaveDay        LeaveDay    @default(FULL)
-  daysRequested   Decimal     @db.Decimal(5, 1)
-  status          LeaveStatus @default(PENDING)
-  reason          String
-  rejectionReason String?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id                 String       @id @default(cuid())
+  employeeId         String
+  leaveTypeId        String
+  startDate          DateTime     @db.Date
+  endDate            DateTime     @db.Date
+  leaveDay           LeaveDay     @default(FULL)
+  daysRequested      Decimal      @db.Decimal(5, 1)
+  status             LeaveStatus  @default(PENDING)
+  pmdStatus          LeaveStatus? @default(PENDING)
+  reason             String
+  rejectionReason    String?
+  pmdRejectionReason String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 
   employee  Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   leaveType LeaveType       @relation(fields: [leaveTypeId], references: [id])

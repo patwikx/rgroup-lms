@@ -1,4 +1,4 @@
-import { EmployeeRegistrationForm } from "@/components/registration/employee-form";
+
 
 
 
@@ -9,7 +9,7 @@ export default function RegisterEmployeePage() {
         <h1 className="text-3xl font-bold">Register New Employee</h1>
         <p className="text-muted-foreground">Create a new employee account</p>
       </div>
-      <EmployeeRegistrationForm />
+   
     </div>
   );
 }

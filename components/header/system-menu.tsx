@@ -14,10 +14,11 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { CalendarCheck, FileTextIcon, Settings, Users2Icon } from "lucide-react"
+import { CalendarCheck, DatabaseIcon, FileArchive, FileTextIcon, Settings, Users2Icon } from "lucide-react"
 import { FaTasks } from "react-icons/fa"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import TeamSwitcher from "./team-switcher"
+import { FcDataSheet } from "react-icons/fc"
 
 const components: { title: string; href: string; description: string }[] = [
   {
@@ -67,7 +68,7 @@ export function SystemMenu() {
         </NavigationMenuItem>
         {(isHR &&
         <NavigationMenuItem>
-          <Link href="/dashboard/employee" legacyBehavior passHref>
+          <Link href="/dashboard/employee-management" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               <FileTextIcon className="h-4 w-4 mr-2"/>Employee Management
             </NavigationMenuLink>
@@ -79,6 +80,15 @@ export function SystemMenu() {
           <Link href="/dashboard/pmd-approval" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               <FileTextIcon className="h-4 w-4 mr-2"/>PMD - For Approval
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+        )}
+        {(isHR &&
+          <NavigationMenuItem>
+          <Link href="/dashboard/reports" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <FileArchive className="h-4 w-4 mr-2"/>Leave Reports
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>

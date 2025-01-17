@@ -54,22 +54,20 @@ export const LoginSchema = z.object({
 });
 
 export const EmployeeSchema = z.object({
-  firstName: z.string().min(2, "First name is required"),
-  lastName: z.string().min(2, "Last name is required"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  department: z.string().min(2, "Department is required"),
-  position: z.string().min(2, "Position is required"),
+  department: z.string().min(1, "Department is required"),
+  position: z.string().min(1, "Position is required"),
   isManager: z.boolean().default(false),
   isHR: z.boolean().default(false),
   supervisorId: z.string().min(1, "Supervisor is required"),
-  hrApproverId: z.string().min(1, "HR approver is required"),
-  role: z.enum(["USER", "HR", "SUPERVISOR"], {
-    required_error: "Role is required",
-  }),
+  role: z.enum(["USER", "SUPERVISOR", "HR"]).default("USER"),
 });
 
 export type EmployeeFormData = z.infer<typeof EmployeeSchema>;
+
 
 export const LeaveRequestSchema = z.object({
   leaveTypeId: z.string(),

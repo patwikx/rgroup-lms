@@ -61,11 +61,6 @@ export async function createEmployee(data: EmployeeFormData) {
           approverId: fields.supervisorId,
           approvalLevel: ApprovalLevel.SUPERVISOR,
         },
-        {
-          employeeId: employee.id,
-          approverId: fields.hrApproverId,
-          approvalLevel: ApprovalLevel.HR,
-        },
       ],
     });
 
