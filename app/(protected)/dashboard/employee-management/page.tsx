@@ -5,7 +5,7 @@ import { UserManagement } from './user-management';
 
 
 export const metadata: Metadata = {
-  title: 'User Management',
+  title: 'RDHFSI User Management',
   description: 'Manage system users and their access',
 };
 

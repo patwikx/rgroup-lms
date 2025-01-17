@@ -9,8 +9,8 @@ import "@uploadthing/react/styles.css";
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'RD Group LMS',
-  description: 'RD Group Leave Management System',
+  title: 'RDHFSI LMS',
+  description: 'RDHFSI Leave Management System',
 }
 
 export default async function RootLayout({

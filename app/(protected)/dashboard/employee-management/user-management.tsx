@@ -204,9 +204,10 @@ export function UserManagement({ initialUsers }: Props) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
+<div>
+
+
+        <div className="flex items-center justify-between mb-4">
           
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
@@ -236,10 +237,9 @@ export function UserManagement({ initialUsers }: Props) {
               Print
             </Button>
           </div>
-          <CardTitle><EmployeeRegistrationDialog /></CardTitle>
+          <EmployeeRegistrationDialog />
         </div>
-      </CardHeader>
-      <CardContent>
+
         <Table>
           <TableHeader>
             <TableRow>
@@ -407,8 +407,7 @@ export function UserManagement({ initialUsers }: Props) {
             />
           </DialogContent>
         </Dialog>
-      </CardContent>
-    </Card>
+        </div>
   );
 }
 
