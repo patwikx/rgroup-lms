@@ -7,27 +7,17 @@ import { cn } from "@/lib/utils"
 
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { CalendarCheck, DatabaseIcon, FileArchive, FileTextIcon, Settings, Users2Icon } from "lucide-react"
-import { FaTasks } from "react-icons/fa"
+import { CalendarCheck, FileArchive, FileTextIcon, Settings, Users2Icon } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import TeamSwitcher from "./team-switcher"
-import { FcDataSheet } from "react-icons/fc"
 
-const components: { title: string; href: string; description: string }[] = [
-  {
-    title: "View Payslip 💵",
-    href: "/dashboard/payslip",
-    description:
-      "A modal dialog that interrupts the user with important content and expects a response.",
-  },
-]
+
+
 
 export function SystemMenu() {
 
@@ -93,6 +83,7 @@ export function SystemMenu() {
           </Link>
         </NavigationMenuItem>
         )}
+          {(isHR &&
         <NavigationMenuItem>
           <Link href="/dashboard/settings" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -100,6 +91,7 @@ export function SystemMenu() {
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
+        )}
       </NavigationMenuList>
     </NavigationMenu>
   )

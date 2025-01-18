@@ -92,7 +92,8 @@ export function SideBarNav() {
         },
       ]
     },
-    {
+    
+    ...(isHR ? [{
       title: 'Settings',
       items: [
         {
@@ -102,7 +103,7 @@ export function SideBarNav() {
           description: "Manage your account settings"
         },
       ]
-    }
+    }] : []),
   ]
 
   return (
