@@ -83,19 +83,9 @@ export function Header () {
           </Sheet>
         </nav>
         <div className="flex items-center gap-4 ml-auto">
-          <form className="relative flex-1 sm:flex-initial">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search ..."
-                className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-              />
-            </div>
-          </form>
           <DropdownMenu>
           <DropdownMenuTrigger asChild>
-  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+  <Button variant="ghost" className="relative h-8 w-8">
     <Avatar className="h-8 w-8">
       {user?.image ? (
         <AvatarImage src={user.image} alt={`${user?.firstName} ${user?.lastName}`} />

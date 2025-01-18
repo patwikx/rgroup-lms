@@ -34,6 +34,8 @@ import { UserDetailsForm } from './employee-details-form';
 import { EmployeeRegistrationDialog } from '@/components/registration/employee-form';
 import { LoadingRow } from './loading-row';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { redirect } from 'next/navigation';
 
 interface LeaveBalance {
   id: string;
@@ -92,6 +94,12 @@ export function UserManagement({ initialUsers }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isStatusLoading, setIsStatusLoading] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const session = useCurrentUser();
+
+    if (!session || session.role !== 'HR') {
+      redirect('/dashboard');
+    }
 
   const [optimisticUsers, updateOptimisticUsers] = useOptimistic(
     users,

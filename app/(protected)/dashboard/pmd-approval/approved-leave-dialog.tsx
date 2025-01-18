@@ -85,10 +85,6 @@ export function ApprovedLeaveDialog({ request, onClose }: ApprovedLeaveDialogPro
         <DialogHeader>
           <div className="flex items-center gap-4">
             <DialogTitle className="text-base">Approved Leave Request</DialogTitle>
-
-          </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            Request #{request.id.slice(-8).toUpperCase()}
           </div>
         </DialogHeader>
 
@@ -180,7 +176,7 @@ export function ApprovedLeaveDialog({ request, onClose }: ApprovedLeaveDialogPro
                 <>
                   <Separator className="my-2" />
                   <div className="grid grid-cols-[auto,1fr] gap-x-4 text-sm">
-                    <div className="font-medium">HR:</div>
+                    <div className="font-medium">Approver:</div>
                     <div>{hrApproval.approver.firstName} {hrApproval.approver.lastName}</div>
                     {hrApproval.comment && (
                       <>

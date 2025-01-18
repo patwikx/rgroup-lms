@@ -1,22 +1,42 @@
+import { Metadata } from 'next';
+import { Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { getLeaveRequests } from '@/actions/leave-reports';
+import { LeaveRequestsReport } from './components/leave-request-report';
 
-import { DateRangePicker } from "./components/date-range-picker";
-import { LeaveReportsTable } from "./components/leave-reports-table"
+export const metadata: Metadata = {
+  title: 'RDHFSI Leave Requests Report',
+  description: 'View and manage leave request reports',
+};
 
-import { getLeaves } from "@/actions/get-leaves";
+export const revalidate = 0;
 
-export default async function ReportsPage({
-  searchParams,
-}: {
-  searchParams?: { from?: string; to?: string }
-}) {
-  const leaves = await getLeaves(searchParams?.from, searchParams?.to)
-
+function LoadingState() {
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-5">Leave Reports</h1>
-      <DateRangePicker />
-      <LeaveReportsTable leaves={leaves} />
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-[250px]" />
+        <Skeleton className="h-4 w-[300px]" />
+      </div>
+      <div className="rounded-lg border">
+        <Skeleton className="h-[500px]" />
+      </div>
     </div>
-  )
+  );
 }
 
+export default async function LeaveRequestsPage() {
+  const requests = await getLeaveRequests();
+  
+  return (
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold">Leave Requests Report</h1>
+        <p className="text-muted-foreground">View and analyze leave request data</p>
+      </div>
+      <Suspense fallback={<LoadingState />}>
+        <LeaveRequestsReport initialRequests={requests} />
+      </Suspense>
+    </div>
+  );
+}

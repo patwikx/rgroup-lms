@@ -34,6 +34,7 @@ import { LeaveRequestSchema } from "@/schemas";
 import { cn } from "@/lib/utils";
 import type { LeaveType } from "@prisma/client";
 import { calculateLeaveDuration } from "@/lib/date-calendar";
+import { useRouter } from "next/navigation";
 
 interface LeaveRequestFormProps {
   leaveTypes: LeaveType[];
@@ -53,6 +54,7 @@ export function LeaveRequestForm({ leaveTypes }: LeaveRequestFormProps) {
   const [isHalfDayDisabled, setIsHalfDayDisabled] = useState(false);
   const [selectedLeaveType, setSelectedLeaveType] = useState<LeaveType | null>(null);
   const [minNoticeDate, setMinNoticeDate] = useState<Date | null>(null);
+  const router = useRouter();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(LeaveRequestSchema),
@@ -104,16 +106,21 @@ export function LeaveRequestForm({ leaveTypes }: LeaveRequestFormProps) {
       formData.append("endDate", values.endDate.toISOString());
       formData.append("leaveDay", values.leaveDay);
       formData.append("reason", values.reason);
-
+  
       const result = await createLeaveRequest(formData);
-
+  
       if (!result.success) {
         toast.error(result.error);
         return;
       }
-
+  
       toast.success("Leave request submitted successfully");
       form.reset();
+  
+      // Add a 2-second delay before navigating
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+  
+      router.push("/dashboard");
     } catch (error) {
       toast.error("Something went wrong");
     } finally {

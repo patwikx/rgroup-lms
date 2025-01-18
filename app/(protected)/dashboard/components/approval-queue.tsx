@@ -1,4 +1,5 @@
 'use client'
+
 import {
   Card,
   CardContent,
@@ -10,6 +11,9 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import type { LeaveApproval, LeaveRequest, Employee, LeaveType } from '@prisma/client';
 import { useCurrentUser } from '@/hooks/use-current-user';
+import { Badge } from '@/components/ui/badge';
+import { Eye } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface ApprovalQueueProps {
   approvals: (LeaveApproval & {
@@ -22,6 +26,7 @@ interface ApprovalQueueProps {
 
 export function ApprovalQueue({ approvals }: ApprovalQueueProps) {
   const user = useCurrentUser();
+  const router = useRouter();
 
   const isApprover = user?.role === 'SUPERVISOR';
   const isHR = user?.role === 'HR';
@@ -32,9 +37,12 @@ export function ApprovalQueue({ approvals }: ApprovalQueueProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Pending Approvals</CardTitle>
-        <CardDescription>Leave requests requiring your approval</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Pending Approvals</CardTitle>
+          <CardDescription>Leave requests requiring your approval</CardDescription>
+        </div>
+        <Button variant="outline" onClick={() => router.push('/dashboard/approvals')}><Eye className='h-4 w-4 mr-2' />View All</Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {approvals.map((approval) => (
@@ -53,10 +61,8 @@ export function ApprovalQueue({ approvals }: ApprovalQueueProps) {
               </p>
             </div>
             <div className="space-x-2">
-              <Button variant="outline" size="sm">
-                Reject
-              </Button>
-              <Button size="sm">Approve</Button>
+              <Badge>{approval.leaveRequest.leaveType.name}</Badge>
+              <Badge className="bg-purple-500 text-white">{approval.status}</Badge>
             </div>
           </div>
         ))}
