@@ -82,6 +82,17 @@ export function SideBarNav() {
       ]
     }] : []),
     {
+      title: 'Profile',
+      items: [
+        {
+          href: "/dashboard/profile",
+          label: 'Employee Profile',
+          icon: Users2,
+          description: "Manage your account profile"
+        },
+      ]
+    },
+    {
       title: 'Settings',
       items: [
         {

@@ -18,13 +18,22 @@ export const Header = ({
   return (
     <div className="w-full flex flex-col gap-y-4 items-center justify-center">
       <div className="flex items-center">
-      <Image src='/assets/rdrdc.webp' alt="rdrdc-logo" width={60} height={60}/>
+        {/* 
+              <Image src='/assets/rdrdc.webp' alt="rdrdc-logo" width={60} height={60}/>
       <Image src='/assets/TWC.png' alt="rdrdc-logo" width={160} height={160}/>
-        <Image src='/assets/rdh.webp' alt="rdrdc-logo" width={70} height={70}/>
+        */}
+
+        <Image src='/assets/rdh.webp' alt="rdrdc-logo" width={90} height={90}/>
         
         </div>
-      <h1 className={cn(
+        <h1 className={cn(
         "text-3xl font-semibold text-center items-center",
+        font.className,
+      )}>
+       RD Hardware & Fishing Supply, Inc.
+      </h1>
+      <h1 className={cn(
+        "text-xl text-muted-foreground text-center items-center",
         font.className,
       )}>
        Leave Management System

@@ -58,14 +58,7 @@ export function Header () {
                   For Approval
                 </Link>
                 <Link
-                  href="#"
-                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-                >
-                  <FileTextIcon className="h-5 w-5" />
-                  Payslip Management
-                </Link>
-                <Link
-                  href="#"
+                  href="/dashboard/profile"
                   className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
                 >
                   <User className="h-5 w-5" />
@@ -110,7 +103,7 @@ export function Header () {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
             Profile
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>
