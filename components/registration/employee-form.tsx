@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -89,7 +89,7 @@ export function EmployeeRegistrationDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="mr-2 h-4 w-4" />
+          <Users className="mr-2 h-4 w-4" />
           Add Employee
         </Button>
       </DialogTrigger>

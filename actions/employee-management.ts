@@ -75,6 +75,7 @@ export async function updateUserDetails(
       await tx.user.update({
         where: { id: userId },
         data: {
+          name: `${firstName} ${lastName}`, // Update the name in User model
           email,
           role: approvalLevel,
         },
@@ -139,4 +140,39 @@ export async function toggleUserStatus(userId: string, isActive: boolean) {
     console.error('Toggle status error:', error);
     throw new Error('Failed to update user status');
   }
+}
+
+export async function getEmployeeLeaveBalances(employeeId: string) {
+  try {
+    const balances = await prisma.leaveBalance.findMany({
+      where: {
+        employeeId: employeeId,
+        year: new Date().getFullYear()
+      },
+      include: {
+        leaveType: true
+      }
+    });
+    return balances;
+  } catch (error) {
+    console.error('Error fetching leave balances:', error);
+    throw new Error('Failed to fetch leave balances');
+  }
+}
+
+export async function getUsersWithLeaveBalances() {
+  const users = await getUsers();
+  const usersWithBalances = await Promise.all(
+    users.map(async (user) => {
+      if (user.employee) {
+        const leaveBalances = await getEmployeeLeaveBalances(user.employee.id);
+        return {
+          ...user,
+          leaveBalances
+        };
+      }
+      return { ...user, leaveBalances: [] };
+    })
+  );
+  return usersWithBalances;
 }

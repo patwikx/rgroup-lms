@@ -27,7 +27,7 @@ import {
               <div className="flex justify-between text-sm">
                 <span>{balance.leaveType.name}</span>
                 <span className="font-medium">
-                  {balance.balance.toNumber()} / {balance.leaveType.annualAllowance.toNumber()} days
+                  {balance.balance} / {balance.leaveType.annualAllowance} days
                 </span>
               </div>
               <Progress 

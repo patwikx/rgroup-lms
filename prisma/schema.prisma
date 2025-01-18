@@ -86,7 +86,7 @@ model LeaveType {
   id                 String   @id @default(cuid())
   name               String   @unique
   description        String?
-  annualAllowance    Decimal  @db.Decimal(5, 1)
+  annualAllowance    Float
   requiresApproval   Boolean  @default(true)
   isPaid             Boolean  @default(true)
   minNoticeDays      Int      @default(0)
@@ -104,9 +104,9 @@ model LeaveBalance {
   employeeId  String
   leaveTypeId String
   year        Int
-  balance     Decimal  @default(0) @db.Decimal(5, 1)
-  used        Decimal  @default(0) @db.Decimal(5, 1)
-  pending     Decimal  @default(0) @db.Decimal(5, 1)
+  balance     Float    @default(0)
+  used        Float    @default(0)
+  pending     Float    @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -123,7 +123,7 @@ model LeaveRequest {
   startDate          DateTime     @db.Date
   endDate            DateTime     @db.Date
   leaveDay           LeaveDay     @default(FULL)
-  daysRequested      Decimal      @db.Decimal(5, 1)
+  daysRequested      Float
   status             LeaveStatus  @default(PENDING)
   pmdStatus          LeaveStatus? @default(PENDING)
   reason             String
