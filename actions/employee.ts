@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { ApprovalLevel } from "@prisma/client";
 import { EmployeeFormData, EmployeeSchema } from "@/schemas";
+import { revalidatePath } from "next/cache";
 
 export async function createEmployee(data: EmployeeFormData) {
   try {
@@ -77,7 +78,7 @@ export async function createEmployee(data: EmployeeFormData) {
         pending: 0,
       })),
     });
-
+    revalidatePath('/dashboard/employee-management');
     return { success: true, data: { user, employee } };
   } catch (error) {
     console.error('Employee creation error:', error);
