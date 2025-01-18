@@ -22,6 +22,10 @@ const nextConfig = {
           protocol: 'https',
           hostname: 'files.stripe.com',
         },
+        {
+          protocol: 'https',
+          hostname: '4b9moeer4y.ufs.sh',
+        },
         ],
       },
         reactStrictMode: false,

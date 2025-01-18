@@ -1,6 +1,6 @@
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
-
+import { getLeaveBalances } from './leave-balance';
 
 export async function getDashboardStats() {
   const session = await auth();
@@ -13,23 +13,27 @@ export async function getDashboardStats() {
 
   const currentYear = new Date().getFullYear();
 
-  // Get total available days
   const leaveBalances = await prisma.leaveBalance.findMany({
     where: {
       employeeId: employee.id,
-      year: currentYear
+      year: currentYear,
+      leaveType: {
+        name: { in: ['ML', 'SL', 'VL'] }
+      }
     },
     select: {
-      balance: true
+      balance: true,
+      used: true,
+      pending: true
     }
   });
 
   const availableDays = leaveBalances.reduce(
-    (sum, balance) => sum + Number(balance.balance),
+    (sum, balance) => sum + Number(balance.balance) - Number(balance.used) - Number(balance.pending),
     0
   );
 
-  // Get pending requests count
+
   const pendingRequests = await prisma.leaveRequest.count({
     where: {
       employeeId: employee.id,
@@ -37,29 +41,19 @@ export async function getDashboardStats() {
     }
   });
 
-  // Get approved leaves count for current year
   const approvedLeaves = await prisma.leaveRequest.count({
     where: {
       employeeId: employee.id,
-      status: 'APPROVED',
-      startDate: {
-        gte: new Date(currentYear, 0, 1)
-      },
-      endDate: {
-        lte: new Date(currentYear, 11, 31)
-      }
+      status: 'APPROVED'
     }
   });
 
-  // Get pending approvals count if user is a manager or HR
-  const pendingApprovals = employee.isManager || employee.isHR
-    ? await prisma.leaveApproval.count({
-        where: {
-          approverId: employee.id,
-          status: 'PENDING'
-        }
-      })
-    : 0;
+  const pendingApprovals = await prisma.leaveApproval.count({
+    where: {
+      approverId: employee.id,
+      status: 'PENDING'
+    }
+  });
 
   return {
     availableDays,

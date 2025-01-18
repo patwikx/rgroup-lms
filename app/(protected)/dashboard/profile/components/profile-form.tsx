@@ -4,7 +4,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Loader2, Camera, Shield, Users } from "lucide-react";
+import { Loader2, Camera, Shield, Users, Info } from "lucide-react";
 import { Employee, User } from "@prisma/client";
 import {
   Card,
@@ -35,6 +35,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import Image from "next/image";
 
 const profileSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -140,16 +141,25 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <TabsContent value="general" className="space-y-6">
             {/* Profile Image */}
-            <Card className="w-[200px] items-center">
+            <Card className="w-[200px]">
               <CardHeader className="p-0">
                 <div className="relative h-[200px] w-[200px]">
-                  <Avatar className="h-[190px] w-[190px] ml-[5px] mt-[5px]">
-                    <AvatarImage src={initialData.image || ""} />
-                    <AvatarFallback className="text-2xl">
+                  {initialData.image ? (
+                    <div className="relative h-[180px] w-[180px] mx-auto mt-[10px]">
+                      <Image
+                        src={initialData.image}
+                        alt={`${initialData.firstName} ${initialData.lastName}`}
+                        fill
+                        className="rounded object-cover"
+                        sizes="190px"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-[190px] w-[190px] rounded-full bg-muted flex items-center justify-center mx-auto mt-[5px] text-4xl">
                       {initialData.firstName[0]}
                       {initialData.lastName[0]}
-                    </AvatarFallback>
-                  </Avatar>
+                    </div>
+                  )}
                   <div className="absolute bottom-0 right-0 p-1">
                     <HoverCard>
                       <HoverCardTrigger asChild>
@@ -158,10 +168,13 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                         </Button>
                       </HoverCardTrigger>
                       <HoverCardContent>
-                        <p className="text-sm">
-                          Profile picture upload functionality coming soon
-                        </p>
-                      </HoverCardContent>
+  <div className="flex items-center">
+    <Info className="h-12 w-12 mr-2 text-yellow-600" />
+    <p className="text-sm text-yellow-600">
+      Profile picture upload functionality coming soon
+    </p>
+  </div>
+</HoverCardContent>
                     </HoverCard>
                   </div>
                 </div>
