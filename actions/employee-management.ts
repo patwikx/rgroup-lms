@@ -8,7 +8,7 @@ import { ApprovalLevel } from '@prisma/client';
 export async function getUsers() {
   try {
     const users = await prisma.user.findMany({
-      orderBy: { updatedAt: 'asc' },
+      orderBy: { updatedAt: 'desc' },
       include: {
         employee: {
           include: {
