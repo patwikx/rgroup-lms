@@ -2,7 +2,7 @@
 import React from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import Link from 'next/link'
-import { CircleUser, ClipboardListIcon, FileTextIcon, HomeIcon, Menu, Package2, Search, Settings, User } from 'lucide-react'
+import { ChevronDown, CircleUser, ClipboardListIcon, FileTextIcon, HomeIcon, LogOut, Menu, Package2, Search, Settings, User } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
@@ -14,6 +14,7 @@ import { SideBarNav } from '../sidebar/sidebar'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { Badge } from '../ui/badge'
+import { CaretSortIcon } from '@radix-ui/react-icons'
 
 export function Header () {
   const user = useCurrentUser();
@@ -76,49 +77,49 @@ export function Header () {
           </Sheet>
         </nav>
         <div className="flex items-center gap-4 ml-auto">
-          <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-  <Button variant="ghost" className="relative h-8 w-8">
-    <Avatar className="h-8 w-8">
-      {user?.image ? (
-        <AvatarImage src={user.image} alt={`${user?.firstName} ${user?.lastName}`} />
-      ) : (
-        <AvatarFallback>
-          {user?.firstName?.charAt(0)}
-          {user?.lastName?.charAt(0)}
-        </AvatarFallback>
-      )}
-    </Avatar>
-  </Button>
-</DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user?.firstName} {user?.lastName}</p>
-            
-            <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
-            Profile
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            Settings
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
-          Log out
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2 px-3 py-2 h-12">
+                <Avatar className="h-8 w-8">
+                  {user?.image ? (
+                    <AvatarImage src={user.image} alt={`${user?.firstName} ${user?.lastName}`} />
+                  ) : (
+                    <AvatarFallback>
+                      {user?.firstName?.charAt(0)}
+                      {user?.lastName?.charAt(0)}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium">{user?.firstName} {user?.lastName}</span>
+                  <span className="text-xs text-muted-foreground">{user?.email}</span>
+                </div>
+                <CaretSortIcon className="ml-2 h-6 w-6" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">{user?.firstName} {user?.lastName}</p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
+                  Profile
+                  <DropdownMenuShortcut><User className='h-5 w-5' /></DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                Log out
+                <DropdownMenuShortcut><LogOut className='h-4 w-4' /></DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
     </div>

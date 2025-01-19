@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Menu, ChevronDown, FileText, CalendarCheck, FileArchive, Settings, Users2 } from 'lucide-react'
+import { Menu, ChevronDown, FileText, CalendarCheck, FileArchive, Settings, Users2, History, LogOut } from 'lucide-react'
 import { signOut } from "next-auth/react"
 
 import { cn } from "@/lib/utils"
@@ -18,6 +18,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { useCurrentUser } from "@/hooks/use-current-user"
+
 
 
 export function SideBarNav() {
@@ -42,7 +43,7 @@ export function SideBarNav() {
         {
           href: "/dashboard/leave-history",
           label: 'Leave History',
-          icon: FileText,
+          icon: History,
           description: "View your leave history"
         },
       ]
@@ -190,8 +191,8 @@ export function SideBarNav() {
               className="w-full justify-start"
               onClick={() => signOut()}
             >
-              <ChevronDown className="mr-2 h-4 w-4" />
-              Sign Out
+              <LogOut className="mr-4 h-4 w-4" />
+              Log out
             </Button>
           </div>
         </div>

@@ -27,23 +27,34 @@ export async function updateProfile(data: ProfileFormValues) {
 
     const validatedData = profileSchema.parse(data);
 
-    const employee = await prisma.employee.update({
-      where: {
-        empId: session.user.id,
-      },
-      data: {
-        firstName: validatedData.firstName,
-        lastName: validatedData.lastName,
-        email: validatedData.email,
-        department: validatedData.department,
-        position: validatedData.position,
-        contactNo: validatedData.phoneNumber,
-        emergencyContactNo: validatedData.emergencyContact,
-        address: validatedData.address,
-      },
-    });
+    // Update both Employee and User models
+    const [updatedEmployee, updatedUser] = await prisma.$transaction([
+      prisma.employee.update({
+        where: {
+          empId: session.user.id,
+        },
+        data: {
+          firstName: validatedData.firstName,
+          lastName: validatedData.lastName,
+          email: validatedData.email,
+          department: validatedData.department,
+          position: validatedData.position,
+          contactNo: validatedData.phoneNumber,
+          emergencyContactNo: validatedData.emergencyContact,
+          address: validatedData.address,
+        },
+      }),
+      prisma.user.update({
+        where: {
+          id: session.user.id,
+        },
+        data: {
+          name: `${validatedData.firstName} ${validatedData.lastName}`,
+        },
+      }),
+    ]);
 
-    return { success: true, data: employee };
+    return { success: true, data: { employee: updatedEmployee, user: updatedUser } };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { success: false, error: "Invalid data provided" };

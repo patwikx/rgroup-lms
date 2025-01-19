@@ -14,44 +14,68 @@ import {
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { createLeaveType } from "@/actions/leave-settings";
+import { createLeaveType, updateLeaveType } from "@/actions/leave-settings";
+import { LeaveType } from "@prisma/client";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const leaveTypeSchema = z.object({
   name: z.string().min(2).max(50),
-  description: z.string().optional(),
+  description: z.string().nullish(),
   annualAllowance: z.number().min(0),
-  requiresApproval: z.boolean().default(true),
-  isPaid: z.boolean().default(true),
+  requiresApproval: z.boolean(),
+  isPaid: z.boolean(),
   minNoticeDays: z.number().min(0),
-  maxConsecutiveDays: z.number().optional(),
-  allowsHalfDay: z.boolean().default(true),
+  maxConsecutiveDays: z.number().nullish(),
+  allowsHalfDay: z.boolean(),
 });
 
 type LeaveTypeFormValues = z.infer<typeof leaveTypeSchema>;
 
 interface LeaveTypeFormProps {
+  initialData?: LeaveType;
   onSuccess?: () => void;
 }
 
-export function LeaveTypeForm({ onSuccess }: LeaveTypeFormProps) {
+export function LeaveTypeForm({ initialData, onSuccess }: LeaveTypeFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<LeaveTypeFormValues>({
     resolver: zodResolver(leaveTypeSchema),
     defaultValues: {
-      requiresApproval: true,
-      isPaid: true,
-      allowsHalfDay: true,
-      minNoticeDays: 0,
+      name: initialData?.name ?? "",
+      description: initialData?.description ?? "",
+      annualAllowance: initialData?.annualAllowance ?? 0,
+      requiresApproval: initialData?.requiresApproval ?? true,
+      isPaid: initialData?.isPaid ?? true,
+      minNoticeDays: initialData?.minNoticeDays ?? 0,
+      maxConsecutiveDays: initialData?.maxConsecutiveDays ?? null,
+      allowsHalfDay: initialData?.allowsHalfDay ?? true,
     },
   });
 
   async function onSubmit(data: LeaveTypeFormValues) {
     try {
-      await createLeaveType(data);
-      toast.success("Leave type created successfully");
+      setIsLoading(true);
+      // Convert empty string to null for optional fields
+      const formattedData = {
+        ...data,
+        description: data.description || undefined,
+        maxConsecutiveDays: data.maxConsecutiveDays ?? undefined,
+      };
+
+      if (initialData) {
+        await updateLeaveType(initialData.id, formattedData);
+        toast.success("Leave type updated successfully");
+      } else {
+        await createLeaveType(formattedData);
+        toast.success("Leave type created successfully");
+      }
       form.reset();
       onSuccess?.();
     } catch (error) {
-      toast.error("Failed to create leave type");
+      toast.error(initialData ? "Failed to update leave type" : "Failed to create leave type");
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -79,7 +103,7 @@ export function LeaveTypeForm({ onSuccess }: LeaveTypeFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} value={field.value ?? ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -133,8 +157,9 @@ export function LeaveTypeForm({ onSuccess }: LeaveTypeFormProps) {
                   <Input
                     type="number"
                     {...field}
+                    value={field.value ?? ''}
                     onChange={(e) =>
-                      field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                      field.onChange(e.target.value ? Number(e.target.value) : null)
                     }
                   />
                 </FormControl>
@@ -200,8 +225,9 @@ export function LeaveTypeForm({ onSuccess }: LeaveTypeFormProps) {
           />
         </div>
 
-        <Button type="submit" className="w-full">
-          Create Leave Type
+        <Button disabled={isLoading} type="submit" className="w-full">
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {initialData ? "Update" : "Create"} Leave Type
         </Button>
       </form>
     </Form>

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { ApprovalLevel } from "@prisma/client";
 import { EmployeeFormData, EmployeeSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
+import { auth } from "@/auth";
 
 export async function createEmployee(data: EmployeeFormData) {
   try {
@@ -84,4 +85,44 @@ export async function createEmployee(data: EmployeeFormData) {
     console.error('Employee creation error:', error);
     return { success: false, error: "Something went wrong" };
   }
+}
+
+export async function getEmployeeWithApproverAndSubordinates() {
+  const user = await auth();
+  
+  if (!user?.user.email) {
+    throw new Error("Unauthorized");
+  }
+
+  const employee = await prisma.employee.findFirst({
+    where: {
+      email: user?.user.email,
+    },
+    include: {
+      approver: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          position: true,
+          department: true,
+          image: true,
+        },
+      },
+      subordinates: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          position: true,
+          department: true,
+          image: true,
+        },
+      },
+    },
+  });
+
+  return employee;
 }

@@ -2,10 +2,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
+import { EditableAnnualAllowance } from "./editable-annual-allowance";
+import { LeaveType } from "@prisma/client";
 import { DataTableRowActions } from "@/components/ui/data-table-row-actions";
 
 
-export const columns: ColumnDef<any>[] = [
+export const columns: ColumnDef<LeaveType>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -40,6 +42,7 @@ export const columns: ColumnDef<any>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Annual Allowance" />
     ),
+    cell: ({ row }) => <EditableAnnualAllowance leaveType={row.original} />,
   },
   {
     accessorKey: "isPaid",

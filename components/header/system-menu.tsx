@@ -12,7 +12,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { CalendarCheck, FileArchive, FileTextIcon, Settings, Users2Icon } from "lucide-react"
+import { CalendarCheck, FileArchive, FileTextIcon, History, HistoryIcon, Settings, Users2, Users2Icon } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import TeamSwitcher from "./team-switcher"
 
@@ -52,7 +52,7 @@ export function SystemMenu() {
           <NavigationMenuItem>
           <Link href="/dashboard/leave-history" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <FileTextIcon className="h-4 w-4 mr-2"/>Leave History
+              <HistoryIcon className="h-4 w-4 mr-2"/>Leave History
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
@@ -60,7 +60,7 @@ export function SystemMenu() {
         <NavigationMenuItem>
           <Link href="/dashboard/employee-management" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              <FileTextIcon className="h-4 w-4 mr-2"/>Employee Management
+              <Users2 className="h-4 w-4 mr-2"/>Employee Management
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>

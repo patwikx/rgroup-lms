@@ -8,7 +8,7 @@ export type ExtendedUser = DefaultSession["user"] & {
   role: string;
   isHR: boolean;
   isManager: boolean;
-
+  image: string;
   isOAuth: boolean;
 };
 

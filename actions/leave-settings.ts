@@ -43,6 +43,14 @@ export async function updateLeaveType(
   return leaveType;
 }
 
+export async function deleteLeaveType(id: string) {
+  await prisma.leaveType.delete({
+    where: { id },
+  });
+
+  revalidatePath("/settings/leave");
+}
+
 export async function updateLeaveBalance(id: string, balance: number) {
   const updatedBalance = await prisma.leaveBalance.update({
     where: { id },

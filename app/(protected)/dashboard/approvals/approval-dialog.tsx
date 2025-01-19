@@ -26,12 +26,12 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
 
   return (
     <Dialog open={!!request} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px]">
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
               <DialogTitle className="text-lg">Leave Request Review</DialogTitle>
-              <DialogDescription className="text-sm mt-1">
+              <DialogDescription className="text-sm mt-0.5">
                 Request #{request.id.slice(-8).toUpperCase()}
               </DialogDescription>
             </div>
@@ -41,20 +41,20 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
           </div>
         </DialogHeader>
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Section 1: Employee Information */}
           <div>
-            <h3 className="text-sm font-medium mb-2.5">Employee Details</h3>
-            <div className="bg-muted/50 p-3.5 rounded-lg">
+            <h3 className="text-sm font-medium mb-2">Employee Details</h3>
+            <div className="bg-muted/50 p-3 rounded-lg">
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <User className="h-4 w-4 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-sm">
                     {leaveRequest.employee.firstName} {leaveRequest.employee.lastName}
                   </h4>
-                  <div className="text-sm text-muted-foreground flex items-center gap-4 mt-1">
+                  <div className="text-sm text-muted-foreground flex items-center gap-4 mt-0.5">
                     <span className="flex items-center gap-1.5">
                       <Briefcase className="h-3.5 w-3.5" />
                       {leaveRequest.employee.position}
@@ -71,9 +71,9 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
 
           {/* Section 2: Leave Details */}
           <div>
-            <h3 className="text-sm font-medium mb-2.5">Leave Details</h3>
-            <div className="bg-muted/30 p-4 rounded-lg space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-sm font-medium mb-2">Leave Details</h3>
+            <div className="bg-muted/30 p-3 rounded-lg space-y-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-muted-foreground">Type</label>
                   <p className="font-medium mt-0.5">{leaveRequest.leaveType.name}</p>
@@ -84,7 +84,7 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
                 </div>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span>{format(leaveRequest.startDate, 'MMM d')} - {format(leaveRequest.endDate, 'MMM d, yyyy')}</span>
@@ -98,8 +98,8 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
                 </div>
               </div>
 
-              <div className="pt-2">
-                <label className="text-sm text-muted-foreground block mb-1.5">Reason for Leave</label>
+              <div>
+                <label className="text-sm text-muted-foreground block mb-1">Reason for Leave</label>
                 <div className="text-sm">{leaveRequest.reason}</div>
               </div>
             </div>
@@ -107,9 +107,9 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
 
           {/* Section 3: Approval Progress */}
           <div>
-            <h3 className="text-sm font-medium mb-2.5">Approval Progress</h3>
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-sm font-medium mb-2">Approval Progress</h3>
+            <div className="bg-muted/30 p-3 rounded-lg">
+              <div className="flex items-center gap-2 mb-3">
                 <div className={cn(
                   "px-2 py-0.5 rounded-md text-xs font-medium inline-flex items-center gap-1.5",
                   leaveRequest.status === 'APPROVED' && "bg-primary/10 text-primary",
@@ -139,7 +139,7 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
                   <div key={step.level} className="flex items-center flex-1">
                     <div className="flex flex-col items-center relative">
                       <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors duration-200",
+                        "w-7 h-7 rounded-full flex items-center justify-center border-2 transition-colors duration-200",
                         step.status === 'APPROVED' && "bg-primary border-primary text-primary-foreground",
                         step.status === 'REJECTED' && "bg-destructive border-destructive text-destructive-foreground",
                         step.status === 'PENDING' && leaveRequest.approvals.find(a => a.status === 'PENDING')?.level === step.level
@@ -152,7 +152,7 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
                           <span className="text-xs font-medium">{index + 1}</span>
                         )}
                       </div>
-                      <div className="mt-2 text-xs font-medium">{step.label}</div>
+                      <div className="mt-1.5 text-xs font-medium">{step.label}</div>
                       <div className={cn(
                         "mt-0.5 text-[11px]",
                         step.status === 'APPROVED' && "text-primary",
@@ -181,17 +181,17 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
 
           {/* Section 4: Comment */}
           <div>
-            <h3 className="text-sm font-medium mb-2.5">Your Comment</h3>
+            <h3 className="text-sm font-medium mb-2">Your Comment</h3>
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Add your comments..."
-              className="min-h-[80px] text-sm"
+              placeholder="Add your remarks..."
+              className="min-h-[60px] text-sm"
             />
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0 mt-6">
+        <DialogFooter className="gap-2 sm:gap-0 mt-4">
           <div className="flex items-center text-sm text-muted-foreground">
             <AlertCircle className="h-4 w-4 mr-2" />
             Your decision cannot be changed once submitted

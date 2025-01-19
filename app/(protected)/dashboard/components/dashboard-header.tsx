@@ -1,16 +1,18 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import { CalendarDays } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function DashboardHeader() {
   const router = useRouter();
+  const session = useCurrentUser();
 
   return (
     <div className="flex justify-between items-center">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-bold tracking-tight mt-4">Welcome to your Dashboard, {session?.firstName}!</h1>
         <p className="text-muted-foreground">
           Manage your leave requests and approvals
         </p>
