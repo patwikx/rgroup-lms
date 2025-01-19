@@ -23,7 +23,7 @@ export function SystemMenu() {
 
   const user = useCurrentUser();
 
-  const isApprover = user?.role === 'SUPERVISOR';
+  const isApprover = user?.role === 'SUPERVISOR' || user?.role === 'HR';
   const isHR = user?.role === 'HR';
 
   return (

@@ -16,7 +16,7 @@ export default function ApprovalsPage() {
 
   useEffect(() => {
     if (session) {
-      if (session.role !== 'SUPERVISOR') {
+      if (session.role !== 'SUPERVISOR' && session.role !== 'HR') {
         router.push('/dashboard');
         return;
       }
