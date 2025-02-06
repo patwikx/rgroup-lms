@@ -33,7 +33,7 @@ import { toggleUserStatus } from '@/actions/employee-management';
 import { UserDetailsForm } from './employee-details-form';
 import { EmployeeRegistrationDialog } from '@/components/registration/employee-form';
 import { LoadingRow } from './loading-row';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { redirect, useRouter } from 'next/navigation';
 
@@ -87,7 +87,8 @@ const ITEMS_PER_PAGE = 10;
 export const revalidate = 0;
 
 export function UserManagement({ initialUsers }: Props) {
-  const [users, setUsers] = useState(initialUsers);
+  const router = useRouter();
+  const [users, setUsers] = useState<User[]>(initialUsers);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPasswordOpen, setIsPasswordOpen] = useState(false);
@@ -97,9 +98,9 @@ export function UserManagement({ initialUsers }: Props) {
 
   const session = useCurrentUser();
 
-    if (!session || session.role !== 'HR') {
-      redirect('/dashboard');
-    }
+  if (!session || session.role !== 'HR') {
+    redirect('/dashboard');
+  }
 
   const [optimisticUsers, updateOptimisticUsers] = useOptimistic(
     users,
@@ -161,144 +162,144 @@ export function UserManagement({ initialUsers }: Props) {
     const leaveTypesArray = Array.from(uniqueLeaveTypes);
 
     const html = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Management Report</title>
-    <style>
-        @page {
-            size: landscape;
-            margin: 0;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.4;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            background-color: #fff;
-        }
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-bottom: 2px solid #333;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 24px;
-            color: #333;
-        }
-        .header h2 {
-            margin: 5px 0;
-            font-size: 18px;
-            color: #666;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            font-size: 12px;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #e6e6e6;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        .footer {
-            text-align: right;
-            font-size: 12px;
-            color: #666;
-            margin-top: 20px;
-        }
-        .print-button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .print-button:hover {
-            background-color: #45a049;
-        }
-        @media print {
-            .print-button {
-                display: none;
-            }
-            .header {
-                background-color: #fff;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            th {
-                background-color: #e6e6e6 !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>RD HARDWARE & FISHING SUPPLY, INC.</h1>
-            <h2>LEAVE MANAGEMENT SYSTEM - EMPLOYEE REPORT</h2>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Department</th>
-                    <th>Position</th>
-                    <th>Approver</th>
-                    <th>Status</th>
-                    ${leaveTypesArray.map(type => `<th>${type}</th>`).join('')}
-                </tr>
-            </thead>
-            <tbody>
-                ${filteredUsers.map(user => `
-                    <tr>
-                        <td>${user.employee?.firstName} ${user.employee?.lastName}</td>
-                        <td>${user.email}</td>
-                        <td>${user.employee?.department}</td>
-                        <td>${user.employee?.position}</td>
-                        <td>${user.employee?.approver 
-                            ? `${user.employee.approver.firstName} ${user.employee.approver.lastName}`
-                            : 'No approver assigned'}</td>
-                        <td>${user.employee?.isActive ? 'Active' : 'Inactive'}</td>
-                        ${leaveTypesArray.map(type => 
-                            `<td>${getLeaveBalance(user, type)}</td>`
-                        ).join('')}
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-        <div class="footer">
-            <p>Generated on: ${new Date().toLocaleDateString()}</p>
-            <button class="print-button" onclick="window.print()">Print Report</button>
-        </div>
-    </div>
-</body>
-</html>
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Employee Management Report</title>
+          <style>
+              @page {
+                  size: landscape;
+                  margin: 0;
+              }
+              body {
+                  font-family: Arial, sans-serif;
+                  line-height: 1.4;
+                  color: #333;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #fff;
+              }
+              .container {
+                  width: 100%;
+                  max-width: 1400px;
+                  margin: 0 auto;
+                  padding: 20px;
+                  box-sizing: border-box;
+              }
+              .header {
+                  text-align: center;
+                  margin-bottom: 20px;
+                  padding: 10px;
+                  background-color: #f0f0f0;
+                  border-bottom: 2px solid #333;
+              }
+              .header h1 {
+                  margin: 0;
+                  font-size: 24px;
+                  color: #333;
+              }
+              .header h2 {
+                  margin: 5px 0;
+                  font-size: 18px;
+                  color: #666;
+              }
+              table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-bottom: 20px;
+                  font-size: 12px;
+              }
+              th, td {
+                  border: 1px solid #ccc;
+                  padding: 8px;
+                  text-align: left;
+              }
+              th {
+                  background-color: #e6e6e6;
+                  font-weight: bold;
+              }
+              tr:nth-child(even) {
+                  background-color: #f9f9f9;
+              }
+              .footer {
+                  text-align: right;
+                  font-size: 12px;
+                  color: #666;
+                  margin-top: 20px;
+              }
+              .print-button {
+                  background-color: #4CAF50;
+                  color: white;
+                  padding: 10px 20px;
+                  border: none;
+                  cursor: pointer;
+                  font-size: 14px;
+              }
+              .print-button:hover {
+                  background-color: #45a049;
+              }
+              @media print {
+                  .print-button {
+                      display: none;
+                  }
+                  .header {
+                      background-color: #fff;
+                      -webkit-print-color-adjust: exact;
+                      print-color-adjust: exact;
+                  }
+                  th {
+                      background-color: #e6e6e6 !important;
+                      -webkit-print-color-adjust: exact;
+                      print-color-adjust: exact;
+                  }
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <h1>RD HARDWARE & FISHING SUPPLY, INC.</h1>
+                  <h2>LEAVE MANAGEMENT SYSTEM - EMPLOYEE REPORT</h2>
+              </div>
+              <table>
+                  <thead>
+                      <tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Department</th>
+                          <th>Position</th>
+                          <th>Approver</th>
+                          <th>Status</th>
+                          ${leaveTypesArray.map(type => `<th>${type}</th>`).join('')}
+                      </tr>
+                  </thead>
+                  <tbody>
+                      ${filteredUsers.map(user => `
+                          <tr>
+                              <td>${user.employee?.firstName} ${user.employee?.lastName}</td>
+                              <td>${user.email}</td>
+                              <td>${user.employee?.department}</td>
+                              <td>${user.employee?.position}</td>
+                              <td>${user.employee?.approver 
+                                  ? `${user.employee.approver.firstName} ${user.employee.approver.lastName}`
+                                  : 'No approver assigned'}</td>
+                              <td>${user.employee?.isActive ? 'Active' : 'Inactive'}</td>
+                              ${leaveTypesArray.map(type => 
+                                  `<td>${getLeaveBalance(user, type)}</td>`
+                              ).join('')}
+                          </tr>
+                      `).join('')}
+                  </tbody>
+              </table>
+              <div class="footer">
+                  <p>Generated on: ${new Date().toLocaleDateString()}</p>
+                  <button class="print-button" onclick="window.print()">Print Report</button>
+              </div>
+          </div>
+      </body>
+      </html>
     `;
 
     printWindow.document.write(html);
@@ -335,44 +336,54 @@ export function UserManagement({ initialUsers }: Props) {
     }
   };
 
+  const handleUserUpdate = (updatedUser: User) => {
+    setUsers(prevUsers => 
+      prevUsers.map(user => 
+        user.id === updatedUser.id ? updatedUser : user
+      )
+    );
+    updateOptimisticUsers(updatedUser);
+    setIsEditOpen(false);
+    setSelectedUser(null);
+    router.refresh();
+  };
+
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
-  const router = useRouter();
-
   return (
     <div className="w-full mx-auto">
-    <div className="flex justify-between items-center mb-4">
-    <div className="flex items-center gap-2">
-    <div className="relative w-[200px]">
-    <Input
-    placeholder="Search by name..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="pl-8"
-    />
-    <Search className="h-4 w-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
-    </div>
-    <Button
-    variant="outline"
-    size="sm"
-    onClick={handleExportToExcel}
-    >
-    <FileSpreadsheet className="h-4 w-4 mr-2" />
-    Export
-    </Button>
-    <Button
-    variant="outline"
-    size="sm"
-    onClick={handlePrint}
-    >
-    <Printer className="h-4 w-4 mr-2" />
-    Print
-    </Button>
-    </div>
-    <EmployeeRegistrationDialog />
-    </div>
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2">
+          <div className="relative w-[200px]">
+            <Input
+              placeholder="Search by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
+            <Search className="h-4 w-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportToExcel}
+          >
+            <FileSpreadsheet className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrint}
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            Print
+          </Button>
+        </div>
+        <EmployeeRegistrationDialog />
+      </div>
 
       {/* Table Card */}
       <Card>
@@ -507,55 +518,54 @@ export function UserManagement({ initialUsers }: Props) {
               </Table>
             </div>
           </div>
-          </CardContent>
-          </Card>
+        </CardContent>
+      </Card>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
-            <div className="text-sm text-muted-foreground order-2 sm:order-1">
-              Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of{" "}
-              {filteredUsers.length} entries
-            </div>
-            <div className="flex items-center gap-2 order-1 sm:order-2">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => goToPage(1)}
-                disabled={currentPage === 1}
-                className="hidden sm:inline-flex"
-              >
-                <ChevronsLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <div className="text-sm font-medium">
-                Page {currentPage} of {totalPages}
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => goToPage(totalPages)}
-                disabled={currentPage === totalPages}
-                className="hidden sm:inline-flex"
-              >
-                <ChevronsRight className="h-4 w-4" />
-              </Button>
-            </div>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4">
+        <div className="text-sm text-muted-foreground order-2 sm:order-1">
+          Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of{" "}
+          {filteredUsers.length} entries
+        </div>
+        <div className="flex items-center gap-2 order-1 sm:order-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => goToPage(1)}
+            disabled={currentPage === 1}
+            className="hidden sm:inline-flex"
+          >
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="text-sm font-medium">
+            Page {currentPage} of {totalPages}
           </div>
-
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => goToPage(totalPages)}
+            disabled={currentPage === totalPages}
+            className="hidden sm:inline-flex"
+          >
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
       {/* Dialogs */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
@@ -565,11 +575,7 @@ export function UserManagement({ initialUsers }: Props) {
           </DialogHeader>
           <UserDetailsForm 
             user={selectedUser} 
-            onSuccess={() => {
-              setIsEditOpen(false);
-              setSelectedUser(null);
-              router
-            }}
+            onSuccess={handleUserUpdate}
           />
         </DialogContent>
       </Dialog>
@@ -584,7 +590,6 @@ export function UserManagement({ initialUsers }: Props) {
             onSuccess={() => {
               setIsPasswordOpen(false);
               setSelectedUser(null);
-              router.refresh();
             }}
           />
         </DialogContent>

@@ -71,19 +71,37 @@ export async function updateUserDetails(
   const { firstName, lastName, email, department, position, approverId, approvalLevel } = data;
 
   try {
-    await prisma.$transaction(async (tx) => {
+    const [updatedUser] = await prisma.$transaction(async (tx) => {
       // Update user details
-      await tx.user.update({
+      const user = await tx.user.update({
         where: { id: userId },
         data: {
-          name: `${firstName} ${lastName}`, // Update the name in User model
+          name: `${firstName} ${lastName}`,
           email,
           role: approvalLevel,
         },
+        include: {
+          employee: {
+            include: {
+              approver: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  position: true,
+                }
+              },
+              leaveBalances: {
+                include: {
+                  leaveType: true,
+                }
+              }
+            }
+          }
+        }
       });
 
       // Update employee details
-      await tx.employee.update({
+      const employee = await tx.employee.update({
         where: { empId: userId },
         data: {
           firstName,
@@ -97,13 +115,15 @@ export async function updateUserDetails(
           isHR: approvalLevel === ApprovalLevel.HR,
         },
       });
+
+      return [user];
     });
 
     revalidatePath('/dashboard/employee-management');
-    return { success: true };
+    return { success: true, data: updatedUser };
   } catch (error) {
     console.error('Update error:', error);
-    throw new Error('Failed to update user details');
+    return { success: false, error: 'Failed to update user details' };
   }
 }
 

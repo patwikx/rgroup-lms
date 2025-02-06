@@ -24,6 +24,7 @@ import {
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { updateUserDetails, getAvailableApprovers } from '@/actions/employee-management';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -43,12 +44,13 @@ interface Approver {
 
 interface UserDetailsFormProps {
   user: any;
-  onSuccess: () => void;
+  onSuccess: (updatedUser: any) => void;
 }
 
 export function UserDetailsForm({ user, onSuccess }: UserDetailsFormProps) {
   const [approvers, setApprovers] = useState<Approver[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchApprovers = async () => {
@@ -83,11 +85,36 @@ export function UserDetailsForm({ user, onSuccess }: UserDetailsFormProps) {
         ...values,
         approvalLevel: user?.employee?.approvalLevel || 'USER',
       });
+
       if (result.success) {
+        const selectedApprover = values.approverId === 'no-approver' 
+          ? null 
+          : approvers.find(a => a.id === values.approverId);
+
+        const updatedUser = {
+          ...user,
+          email: values.email,
+          name: `${values.firstName} ${values.lastName}`,
+          employee: {
+            ...user.employee,
+            firstName: values.firstName,
+            lastName: values.lastName,
+            department: values.department,
+            position: values.position,
+            approverId: values.approverId === 'no-approver' ? null : values.approverId,
+            approver: selectedApprover ? {
+              firstName: selectedApprover.firstName,
+              lastName: selectedApprover.lastName,
+              position: selectedApprover.position,
+            } : null
+          }
+        };
+
         toast.success('User details updated successfully');
-        onSuccess();
+        onSuccess(updatedUser);
+        router.refresh();
       } else {
-        toast.error('Failed to update user details');
+        toast.error(result.error || 'Failed to update user details');
       }
     } catch (error) {
       toast.error('Failed to update user details');
@@ -203,4 +230,3 @@ export function UserDetailsForm({ user, onSuccess }: UserDetailsFormProps) {
     </Form>
   );
 }
-
