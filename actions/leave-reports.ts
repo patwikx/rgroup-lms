@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/db";
 import { LeaveStatus } from "@prisma/client";
 
+export const dynamic = 'force-dynamic'
 
 export async function getLeaveRequests(status?: LeaveStatus) {
   try {

@@ -3,6 +3,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { LeaveStatus } from "@prisma/client";
 
+export const dynamic = 'force-dynamic'
+
 export async function getUserLeaveHistory(status?: LeaveStatus) {
   try {
     const session = await auth();

@@ -35,7 +35,7 @@ import { EmployeeRegistrationDialog } from '@/components/registration/employee-f
 import { LoadingRow } from './loading-row';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCurrentUser } from '@/hooks/use-current-user';
-import { redirect } from 'next/navigation';
+import { redirect, useRouter } from 'next/navigation';
 
 interface LeaveBalance {
   id: string;
@@ -339,8 +339,10 @@ export function UserManagement({ initialUsers }: Props) {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
+  const router = useRouter();
+
   return (
-    <div className="w-[90%] mx-auto">
+    <div className="w-full mx-auto">
     <div className="flex justify-between items-center mb-4">
     <div className="flex items-center gap-2">
     <div className="relative w-[200px]">
@@ -566,6 +568,7 @@ export function UserManagement({ initialUsers }: Props) {
             onSuccess={() => {
               setIsEditOpen(false);
               setSelectedUser(null);
+              router
             }}
           />
         </DialogContent>
@@ -581,6 +584,7 @@ export function UserManagement({ initialUsers }: Props) {
             onSuccess={() => {
               setIsPasswordOpen(false);
               setSelectedUser(null);
+              router.refresh();
             }}
           />
         </DialogContent>
