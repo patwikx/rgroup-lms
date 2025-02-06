@@ -566,7 +566,6 @@ export function UserManagement({ initialUsers }: Props) {
             onSuccess={() => {
               setIsEditOpen(false);
               setSelectedUser(null);
-              window.location.reload();
             }}
           />
         </DialogContent>
