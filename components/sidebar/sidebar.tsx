@@ -19,8 +19,6 @@ import {
 } from "@/components/ui/sheet"
 import { useCurrentUser } from "@/hooks/use-current-user"
 
-
-
 export function SideBarNav() {
   const user = useCurrentUser();
   const pathname = usePathname()
@@ -121,16 +119,20 @@ export function SideBarNav() {
       </SheetTrigger>
       <SheetContent side="left" className="p-0">
         <div className="flex h-full flex-col">
-          <SheetHeader className="px-4 pt-6 pb-4 border-b">
-            <div className="flex items-center space-x-3">
-              <Image src="/assets/rdh.webp" alt="Logo" width={40} height={40} className="rounded-lg" />
-              <div>
-                <SheetTitle className="text-md">RD Hardware & Fishing Supply, Inc.</SheetTitle>
+          <SheetHeader className="px-4 pt-2 pb-2 border-b">
+            <div className="flex flex-col items-center space-y-1">
+              <div className="flex items-center space-x-3">
+                <Image src='/assets/rdrdc.webp' alt="rdrdc-logo" width={40} height={40} />
+                <Image src='/assets/TWC.png' alt="twc-logo" width={120} height={120} />
+                <Image src='/assets/rdh.webp' alt="rdh-logo" width={50} height={50} />
+              </div>
+              <div className="flex flex-col items-center space-y-1">
+                <SheetTitle className="text-lg font-bold">RD Realty Group</SheetTitle>
                 <p className="text-sm text-muted-foreground">Leave Management System</p>
               </div>
             </div>
           </SheetHeader>
-          
+
           <div className="flex-1 overflow-auto">
             <div className="space-y-6 py-4">
               {navigationItems.map((section, i) => (
@@ -142,7 +144,7 @@ export function SideBarNav() {
                     {section.items.map((item) => {
                       const Icon = item.icon
                       const isActive = pathname === item.href
-                      
+
                       return (
                         <Link
                           key={item.href}
@@ -171,7 +173,7 @@ export function SideBarNav() {
               ))}
             </div>
           </div>
-          
+
           <div className="border-t px-4 py-4">
             <div className="flex items-center gap-3 mb-4 px-2">
               <Avatar className="h-9 w-9">

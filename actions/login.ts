@@ -6,9 +6,6 @@ import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
 import { LoginSchema } from "@/schemas";
 import { getUserByEmail } from "@/data/user";
-import { 
-  sendVerificationEmail,
-} from "@/lib/mail";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
 
@@ -22,20 +19,20 @@ export const login = async (
     return { error: "Invalid fields!" };
   }
 
-  const { email, password } = validatedFields.data;
+  const { employeeId, password } = validatedFields.data;
 
-  const existingUser = await getUserByEmail(email);
+  const existingUser = await getUserByEmail(employeeId);
 
-  if (!existingUser || !existingUser.email || !existingUser.password) {
-    return { error: "Email does not exist!" }
+  if (!existingUser || !existingUser.employeeId || !existingUser.password) {
+    return { error: "Employee does not exist!" }
   }
 
 
   try {
     await signIn("credentials", {
-      email,
+      employeeId,
       password,
-      redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT,
+      redirectTo: DEFAULT_LOGIN_REDIRECT,
     })
   } catch (error) {
     if (error instanceof AuthError) {

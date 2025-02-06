@@ -45,8 +45,8 @@ export const ResetSchema = z.object({
 });
 
 export const LoginSchema = z.object({
-  email: z.string().email({
-    message: "Email is required",
+  employeeId: z.string().min(1, {
+    message: "Employee ID is required",
   }),
   password: z.string().min(1, {
     message: "Password is required",
@@ -54,6 +54,7 @@ export const LoginSchema = z.object({
 });
 
 export const EmployeeSchema = z.object({
+  employeeId: z.string().min(1, "Employee ID is required"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
@@ -62,6 +63,7 @@ export const EmployeeSchema = z.object({
   position: z.string().min(1, "Position is required"),
   isManager: z.boolean().default(false),
   isHR: z.boolean().default(false),
+  isTWC: z.boolean().default(false),
   supervisorId: z.string().min(1, "Supervisor is required"),
   role: z.enum(["USER", "SUPERVISOR", "HR"]).default("USER"),
 });

@@ -46,6 +46,7 @@ export async function createEmployee(data: EmployeeFormData) {
         email: fields.email,
         password: hashedPassword,
         role: approvalLevel,
+        employeeId: fields.employeeId,
       },
     });
 
@@ -53,6 +54,7 @@ export async function createEmployee(data: EmployeeFormData) {
     const employee = await prisma.employee.create({
       data: {
         empId: user.id,
+        employeeId: fields.employeeId,
         firstName: fields.firstName,
         lastName: fields.lastName,
         email: fields.email,
@@ -60,8 +62,9 @@ export async function createEmployee(data: EmployeeFormData) {
         position: fields.position,
         isManager: fields.isManager,
         isHR: fields.isHR,
+        isTWC: fields.isTWC,
         approvalLevel: approvalLevel,
-        approverId: fields.supervisorId || null, // Add this line to set the approverId
+        approverId: fields.supervisorId || null,
       },
     });
 
@@ -69,16 +72,30 @@ export async function createEmployee(data: EmployeeFormData) {
     const leaveTypes = await prisma.leaveType.findMany();
     const currentYear = new Date().getFullYear();
 
-    await prisma.leaveBalance.createMany({
-      data: leaveTypes.map((leaveType) => ({
-        employeeId: employee.id,
-        leaveTypeId: leaveType.id,
-        year: currentYear,
-        balance: leaveType.annualAllowance,
-        used: 0,
-        pending: 0,
-      })),
-    });
+    // Create leave balances
+    for (const leaveType of leaveTypes) {
+      let balance = leaveType.annualAllowance;
+      
+      if (fields.isTWC) {
+        if (leaveType.name === 'SL') {
+          balance = 10; // Sick Leave is 10 days
+        } else if (leaveType.name === 'VL') {
+          balance = 5; // Vacation Leave is 5 days
+        }
+      }
+
+      await prisma.leaveBalance.create({
+        data: {
+          employeeId: employee.id,
+          leaveTypeId: leaveType.id,
+          year: currentYear,
+          balance: balance,
+          used: 0,
+          pending: 0,
+        },
+      });
+    }
+
     revalidatePath('/dashboard/employee-management');
     return { success: true, data: { user, employee } };
   } catch (error) {

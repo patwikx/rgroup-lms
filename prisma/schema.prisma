@@ -39,6 +39,7 @@ model Session {
 
 model User {
   id            String        @id @default(cuid())
+  employeeId    String?       @unique
   name          String?
   email         String        @unique
   password      String
@@ -56,6 +57,7 @@ model User {
 model Employee {
   id                 String    @id @default(cuid())
   empId              String    @unique
+  employeeId         String?
   firstName          String
   lastName           String
   email              String    @unique
@@ -69,6 +71,7 @@ model Employee {
   isActive           Boolean   @default(true)
   isManager          Boolean   @default(false)
   isHR               Boolean   @default(false)
+  isTWC              Boolean   @default(false)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime? @updatedAt
 

@@ -44,6 +44,7 @@ export function EmployeeRegistrationDialog() {
   // Watch for changes in isHR and isManager
   const isHR = form.watch("isHR");
   const isManager = form.watch("isManager");
+  const isTWC = form.watch("isTWC");
 
   // Update role when checkboxes change
   useEffect(() => {
@@ -54,7 +55,7 @@ export function EmployeeRegistrationDialog() {
     } else {
       form.setValue("role", ApprovalLevel.USER);
     }
-  }, [isHR, isManager, form]);
+  }, [isHR, isManager, isTWC, form]);
 
   useEffect(() => {
     const loadApprovers = async () => {

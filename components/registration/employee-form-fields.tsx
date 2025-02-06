@@ -35,6 +35,19 @@ export function EmployeeFormFields({ form, onSubmit, loading, approvers }: Emplo
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <FormField
+            control={form.control}
+            name="employeeId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Employee ID:</FormLabel>
+                <FormControl>
+                  <Input {...field} className="w-[150px]"/>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -149,6 +162,21 @@ export function EmployeeFormFields({ form, onSubmit, loading, approvers }: Emplo
                   />
                 </FormControl>
                 <FormLabel className="!mt-0">Is HR</FormLabel>
+              </FormItem>
+            )}
+          />
+                    <FormField
+            control={form.control}
+            name="isTWC"
+            render={({ field }) => (
+              <FormItem className="flex items-center space-x-2">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <FormLabel className="!mt-0">Is TWC?</FormLabel>
               </FormItem>
             )}
           />

@@ -27,7 +27,7 @@ const groups = [
     label: "Company",
     teams: [
       {
-        label: "RDHFSI LMS",
+        label: "RD Realty Group LMS",
         value: "company",
       },
     ],
@@ -62,7 +62,7 @@ export default function TeamSwitcher({ className }: TeamSwitcherProps) {
             onClick={() => router.push("/dashboard")}
           >
             <Avatar className="mr-2 h-5 w-5">
-              <AvatarFallback> <Image src="/assets/rdh.webp" alt="Image" width={70} height={70} className="flex flex-col"/></AvatarFallback>
+              <AvatarFallback> <Image src="/assets/rdrdc.webp" alt="Image" width={70} height={70} className="flex flex-col"/></AvatarFallback>
             </Avatar>
             {selectedTeam.label}
             <CaretSortIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />

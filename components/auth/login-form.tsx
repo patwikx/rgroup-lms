@@ -39,7 +39,7 @@ export const LoginForm = () => {
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      email: "",
+      employeeId: "",
       password: "",
     },
   });
@@ -77,16 +77,14 @@ export const LoginForm = () => {
               <>
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="employeeId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Employee ID:</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           disabled={isPending}
-                          placeholder="email@example.com"
-                          type="email"
                         />
                       </FormControl>
                       <FormMessage />

@@ -17,9 +17,9 @@ export default {
         const validatedFields = LoginSchema.safeParse(credentials);
 
         if (validatedFields.success) {
-          const { email, password } = validatedFields.data;
+          const { employeeId, password } = validatedFields.data;
           
-          const user = await getUserByEmail(email);
+          const user = await getUserByEmail(employeeId);
           if (!user || !user.password) return null;
 
           const passwordsMatch = await bcrypt.compare(

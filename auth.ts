@@ -49,6 +49,7 @@ export const {
         session.user.id = token.id as string;
         session.user.email = token.email;
         session.user.role = token.role as string;
+        session.user.employeeId = token.employeeId as string;
       }
 
       return session;
@@ -68,10 +69,14 @@ export const {
       token.id = existingUser.id;
       token.email = existingUser.email;
       token.role = existingUser.role;
+      token.employeeId = existingUser.employeeId;
       return token;
     }
   },
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt",
+    maxAge: 60 * 60,
+    updateAge: 24 * 60 * 60,
+   },
   ...authConfig,
 });
