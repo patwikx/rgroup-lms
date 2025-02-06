@@ -1,6 +1,4 @@
 
-'use server'
-
 import { prisma } from "@/lib/db";
 import { LeaveStatus } from "@prisma/client";
 
