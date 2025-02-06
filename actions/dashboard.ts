@@ -1,6 +1,8 @@
+'use server'
+
 import { auth } from '@/auth';
 import { prisma } from '@/lib/db';
-import { getLeaveBalances } from './leave-balance';
+
 
 export async function getDashboardStats() {
   const session = await auth();

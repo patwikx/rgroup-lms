@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 
+
 export async function getLeaveTypes() {
   try {
     const leaveTypes = await prisma.leaveType.findMany({

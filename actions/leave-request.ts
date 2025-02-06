@@ -6,6 +6,7 @@ import { calculateLeaveDays } from "@/lib/leave-calculator";
 import { LeaveRequestFormData, LeaveRequestSchema } from "@/schemas";
 import { LeaveStatus, ApprovalStatus, ApprovalLevel } from "@prisma/client";
 
+
 export async function createLeaveRequest(data: FormData) {
   try {
     const session = await auth();

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { hash } from 'bcryptjs';
 import { ApprovalLevel } from '@prisma/client';
 
+
 export async function getUsers() {
   try {
     const users = await prisma.user.findMany({

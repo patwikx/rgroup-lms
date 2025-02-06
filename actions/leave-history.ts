@@ -1,9 +1,9 @@
 'use server'
 
+
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { LeaveStatus } from "@prisma/client";
-
 
 export async function getUserLeaveHistory(status?: LeaveStatus) {
   try {

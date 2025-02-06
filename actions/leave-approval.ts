@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { ApprovalStatus, LeaveStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
+
 export async function getPendingApprovals() {
   try {
     const session = await auth();

@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db"
 
+
 export async function getLeaves(from?: string, to?: string) {
   const fromDate = from ? new Date(from) : undefined
   const toDate = to ? new Date(to) : undefined
