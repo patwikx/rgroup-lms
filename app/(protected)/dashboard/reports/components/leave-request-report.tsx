@@ -13,14 +13,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
 import { 
   Search, 
   FileSpreadsheet, 
   Filter,
   Calendar,
   Users,
-  Clock
+  Clock,
+  X
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -32,6 +33,8 @@ import {
 } from "@/components/ui/select";
 import { LeaveStatus } from '@prisma/client';
 import { getLeaveRequests } from '@/actions/leave-reports';
+import { DatePicker } from '@/components/ui/datepicker';
+import { DatePickerx } from './date-picker-reports';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -46,6 +49,8 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
   const [requests, setRequests] = useState(initialRequests);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<LeaveStatus | 'ALL'>('ALL');
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
   const [currentPage, setCurrentPage] = useState(1);
 
   // Helper function to get the latest approval comment
@@ -57,12 +62,23 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
     return sortedApprovals[0].comment || 'No remarks';
   };
 
-  // Filter requests based on search term and status
+  // Filter requests based on search term, status, and date range
   const filteredRequests = requests.filter(request => {
     const fullName = `${request.employee.firstName} ${request.employee.lastName}`.toLowerCase();
     const matchesSearch = fullName.includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'ALL' || request.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    // Date range filter
+    let matchesDateRange = true;
+    if (startDate && endDate) {
+      const requestDate = new Date(request.createdAt);
+      matchesDateRange = isWithinInterval(requestDate, {
+        start: startOfDay(startDate),
+        end: endOfDay(endDate)
+      });
+    }
+
+    return matchesSearch && matchesStatus && matchesDateRange;
   });
 
   const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
@@ -79,6 +95,11 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
       setRequests(filteredRequests);
     }
     setCurrentPage(1);
+  };
+
+  const clearDateFilter = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
   };
 
   const handleExportToExcel = () => {
@@ -152,7 +173,7 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
 
       {/* Filters Card */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="relative w-full sm:w-[250px]">
             <Input
               placeholder="Search by name..."
@@ -177,6 +198,21 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
               <SelectItem value="CANCELLED">Cancelled</SelectItem>
             </SelectContent>
           </Select>
+          <div className="flex items-center gap-2">
+            <DatePickerx date={startDate} setDate={setStartDate} />
+            <span className="text-sm text-muted-foreground">to</span>
+            <DatePickerx date={endDate} setDate={setEndDate} />
+            {(startDate || endDate) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={clearDateFilter}
+                className="h-9 w-9"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
           <Button
             variant="outline"
             size="sm"
@@ -197,6 +233,7 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="bg-muted/50 font-semibold">Employee ID</TableHead>
                     <TableHead className="bg-muted/50 font-semibold">Employee</TableHead>
                     <TableHead className="bg-muted/50 font-semibold">Department</TableHead>
                     <TableHead className="bg-muted/50 font-semibold">Leave Type</TableHead>
@@ -213,6 +250,7 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
                 <TableBody>
                   {currentRequests.map((request: { id: string, employee: any, leaveType: any, startDate: string, endDate: string, daysRequested: number, pmdRejectionReason: string, approvals: any[], status: keyof typeof statusColors, pmdStatus: keyof typeof statusColors, createdAt: string }) => (
                     <TableRow key={request.id} className="hover:bg-muted/50 transition-colors">
+                      <TableCell>{request.employee.employeeId}</TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-medium">

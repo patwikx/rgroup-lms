@@ -50,6 +50,8 @@ export const {
         session.user.email = token.email;
         session.user.role = token.role as string;
         session.user.employeeId = token.employeeId as string;
+        session.user.isApprover = token.isApprover as boolean;
+        session.user.isHR = token.isHR as boolean;
       }
 
       return session;

@@ -2,19 +2,17 @@
 import React from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuTrigger } from '../ui/dropdown-menu'
 import Link from 'next/link'
-import { ChevronDown, CircleUser, ClipboardListIcon, FileTextIcon, HomeIcon, LogOut, Menu, Package2, Search, Settings, User } from 'lucide-react'
+import { ClipboardListIcon, HomeIcon, LogOut, Menu, Settings, User } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet'
 import { Button } from '../ui/button'
-import { Input } from '../ui/input'
 import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import TeamSwitcher from './team-switcher'
-import { SystemMenu } from './system-menu'
 import { SideBarNav } from '../sidebar/sidebar'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { useCurrentUser } from '@/hooks/use-current-user'
-import { Badge } from '../ui/badge'
 import { CaretSortIcon } from '@radix-ui/react-icons'
+import { MainNav } from '../new-system-header'
 
 export function Header () {
   const user = useCurrentUser();
@@ -28,9 +26,10 @@ export function Header () {
   return (
     <div className="flex w-full items-center justify-between mb-4">
       <header className="sticky top-0 flex h-16 items-center gap-6 border-b bg-background px-4 md:px-6 w-full">
-        <SideBarNav />
+      <SideBarNav />
+        <TeamSwitcher />
+      <MainNav />
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <SystemMenu />
           <Sheet>
             <SheetTrigger asChild>
               <Button
@@ -76,7 +75,7 @@ export function Header () {
             </SheetContent>
           </Sheet>
         </nav>
-        <div className="flex items-center gap-4 ml-auto">
+        <div className="flex items-center gap-2 ml-auto">
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2 px-3 py-2 h-12">

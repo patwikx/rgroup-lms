@@ -55,6 +55,7 @@ interface LeaveBalance {
 interface Employee {
   id: string;
   empId: string;
+  employeeId: string | null;
   firstName: string;
   lastName: string;
   email: string;
@@ -134,6 +135,7 @@ export function UserManagement({ initialUsers }: Props) {
 
   const handleExportToExcel = () => {
     const data = filteredUsers.map(user => ({
+      'EmployeeID': `${user.employee?.employeeId}`,
       'Name': `${user.employee?.firstName} ${user.employee?.lastName}`,
       'Email': user.email,
       'Department': user.employee?.department,
@@ -266,6 +268,7 @@ export function UserManagement({ initialUsers }: Props) {
               <table>
                   <thead>
                       <tr>
+                          <th>Employee ID</th>
                           <th>Name</th>
                           <th>Email</th>
                           <th>Department</th>
@@ -278,6 +281,7 @@ export function UserManagement({ initialUsers }: Props) {
                   <tbody>
                       ${filteredUsers.map(user => `
                           <tr>
+                              <td>${user.employee?.employeeId}</td>
                               <td>${user.employee?.firstName} ${user.employee?.lastName}</td>
                               <td>${user.email}</td>
                               <td>${user.employee?.department}</td>
@@ -393,6 +397,7 @@ export function UserManagement({ initialUsers }: Props) {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="bg-muted/50 font-semibold">Employee ID</TableHead>
                     <TableHead className="bg-muted/50 font-semibold">Name</TableHead>
                     <TableHead className="bg-muted/50 font-semibold">Email</TableHead>
                     <TableHead className="bg-muted/50 font-semibold">Department</TableHead>
@@ -414,6 +419,9 @@ export function UserManagement({ initialUsers }: Props) {
                   }>
                     {currentUsers.map((user) => (
                       <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
+                        <TableCell className="max-w-[200px] truncate">
+                          {user.employee?.employeeId}
+                        </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
                             <span className="font-medium">

@@ -1,8 +1,7 @@
+'use server'
 
 import { prisma } from "@/lib/db";
 import { LeaveStatus } from "@prisma/client";
-
-export const dynamic = 'force-dynamic'
 
 export async function getLeaveRequests(status?: LeaveStatus) {
   try {
@@ -23,6 +22,7 @@ export async function getLeaveRequests(status?: LeaveStatus) {
         updatedAt: true,
         employee: {
           select: {
+            employeeId: true,
             firstName: true,
             lastName: true,
             department: true,
