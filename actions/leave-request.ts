@@ -6,6 +6,19 @@ import { calculateLeaveDays } from "@/lib/leave-calculator";
 import { LeaveRequestFormData, LeaveRequestSchema } from "@/schemas";
 import { LeaveStatus, ApprovalStatus, ApprovalLevel } from "@prisma/client";
 
+// Philippines is UTC+8
+const PH_OFFSET = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+
+function toPhilippinesTime(date: Date): Date {
+  const utc = date.getTime() + (date.getTimezoneOffset() * 60 * 1000);
+  return new Date(utc + PH_OFFSET);
+}
+
+function fromPhilippinesTime(date: Date): Date {
+  const utc = date.getTime() - PH_OFFSET;
+  return new Date(utc - (date.getTimezoneOffset() * 60 * 1000));
+}
+
 export async function createLeaveRequest(data: FormData) {
   try {
     const session = await auth();
@@ -30,12 +43,14 @@ export async function createLeaveRequest(data: FormData) {
     const startDateStr = data.get('startDate') as string;
     const endDateStr = data.get('endDate') as string;
 
-    // Create dates and set them to noon UTC to avoid timezone issues
-    const startDate = new Date(startDateStr);
-    startDate.setUTCHours(12, 0, 0, 0);
+    // Convert dates to Philippines timezone and set to start of day
+    const startDatePH = toPhilippinesTime(new Date(startDateStr));
+    startDatePH.setHours(0, 0, 0, 0);
+    const startDate = fromPhilippinesTime(startDatePH);
     
-    const endDate = new Date(endDateStr);
-    endDate.setUTCHours(12, 0, 0, 0);
+    const endDatePH = toPhilippinesTime(new Date(endDateStr));
+    endDatePH.setHours(0, 0, 0, 0);
+    const endDate = fromPhilippinesTime(endDatePH);
 
     const rawData = {
       leaveTypeId: data.get('leaveTypeId'),
@@ -63,8 +78,8 @@ export async function createLeaveRequest(data: FormData) {
       fields.leaveDay
     );
 
-    // Get current leave balance
-    const currentYear = new Date().getFullYear();
+    // Get current leave balance using Philippines time
+    const currentYear = toPhilippinesTime(new Date()).getFullYear();
     const leaveBalance = await prisma.leaveBalance.findFirst({
       where: {
         employeeId: employee.id,
@@ -127,7 +142,7 @@ export async function createLeaveRequest(data: FormData) {
 }
 
 export async function validateLeaveRequest(data: LeaveRequestFormData) {
-  const today = new Date();
+  const today = toPhilippinesTime(new Date());
   today.setHours(0, 0, 0, 0);
 
   const minNoticeDate = new Date(today);
