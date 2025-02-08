@@ -6,7 +6,6 @@ import { calculateLeaveDays } from "@/lib/leave-calculator";
 import { LeaveRequestFormData, LeaveRequestSchema } from "@/schemas";
 import { LeaveStatus, ApprovalStatus, ApprovalLevel } from "@prisma/client";
 
-
 export async function createLeaveRequest(data: FormData) {
   try {
     const session = await auth();
@@ -16,7 +15,7 @@ export async function createLeaveRequest(data: FormData) {
 
     const employee = await prisma.employee.findFirst({
       where: { empId: session.user.id },
-      include: { approver: true }, // Include the approver information
+      include: { approver: true },
     });
 
     if (!employee) {
@@ -27,10 +26,21 @@ export async function createLeaveRequest(data: FormData) {
       return { success: false, error: "No approver assigned to this employee" };
     }
 
+    // Get the raw date strings from FormData
+    const startDateStr = data.get('startDate') as string;
+    const endDateStr = data.get('endDate') as string;
+
+    // Create dates and set them to noon UTC to avoid timezone issues
+    const startDate = new Date(startDateStr);
+    startDate.setUTCHours(12, 0, 0, 0);
+    
+    const endDate = new Date(endDateStr);
+    endDate.setUTCHours(12, 0, 0, 0);
+
     const rawData = {
       leaveTypeId: data.get('leaveTypeId'),
-      startDate: new Date(data.get('startDate') as string),
-      endDate: new Date(data.get('endDate') as string),
+      startDate,
+      endDate,
       leaveDay: data.get('leaveDay'),
       reason: data.get('reason'),
     };
