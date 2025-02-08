@@ -36,6 +36,14 @@ import type { LeaveType } from "@prisma/client";
 import { calculateLeaveDuration } from "@/lib/date-calendar";
 import { useRouter } from "next/navigation";
 
+// Philippines is UTC+8
+const PH_OFFSET = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+
+function toPhilippinesTime(date: Date): Date {
+  const utc = date.getTime() + (date.getTimezoneOffset() * 60 * 1000);
+  return new Date(utc + PH_OFFSET);
+}
+
 interface LeaveRequestFormProps {
   leaveTypes: LeaveType[];
 }
@@ -65,7 +73,7 @@ export function LeaveRequestForm({ leaveTypes }: LeaveRequestFormProps) {
 
   useEffect(() => {
     if (selectedLeaveType?.name === "VL" || selectedLeaveType?.name === "ML") {
-      const today = new Date();
+      const today = toPhilippinesTime(new Date());
       today.setHours(0, 0, 0, 0);
       setMinNoticeDate(addDays(today, 3));
     } else {
@@ -118,7 +126,7 @@ export function LeaveRequestForm({ leaveTypes }: LeaveRequestFormProps) {
       form.reset();
   
       // Add a 2-second delay before navigating
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
   
       router.push("/dashboard");
     } catch (error) {
@@ -187,7 +195,7 @@ export function LeaveRequestForm({ leaveTypes }: LeaveRequestFormProps) {
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP")
+                          format(toPhilippinesTime(field.value), "PPP")
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -201,7 +209,7 @@ export function LeaveRequestForm({ leaveTypes }: LeaveRequestFormProps) {
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => {
-                        const today = new Date();
+                        const today = toPhilippinesTime(new Date());
                         today.setHours(0, 0, 0, 0);
                         
                         if (minNoticeDate) {
@@ -235,7 +243,7 @@ export function LeaveRequestForm({ leaveTypes }: LeaveRequestFormProps) {
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "PPP")
+                          format(toPhilippinesTime(field.value), "PPP")
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -249,7 +257,7 @@ export function LeaveRequestForm({ leaveTypes }: LeaveRequestFormProps) {
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) =>
-                        date < (form.watch("startDate") || new Date(new Date().setHours(0, 0, 0, 0)))
+                        date < (form.watch("startDate") || toPhilippinesTime(new Date()).setHours(0, 0, 0, 0))
                       }
                       initialFocus
                     />
