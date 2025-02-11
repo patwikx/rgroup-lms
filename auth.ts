@@ -5,8 +5,6 @@ import { prisma } from "@/lib/db";
 import authConfig from "@/auth.config";
 import { getUserById } from "@/data/user";
 import { getAccountByUserId } from "./data/account";
-import { ApprovalLevel } from "@prisma/client";
-import { boolean } from "zod";
 
 export const {
   handlers: { GET, POST },
@@ -50,11 +48,10 @@ export const {
         session.user.lastName = token.lastName as string;
         session.user.id = token.id as string;
         session.user.email = token.email;
-        session.user.role = token.role as ApprovalLevel;
+        session.user.role = token.role as string;
         session.user.employeeId = token.employeeId as string;
         session.user.isApprover = token.isApprover as boolean;
         session.user.isHR = token.isHR as boolean;
-        session.user.employee?.isManager as boolean;
       }
 
       return session;

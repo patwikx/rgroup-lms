@@ -29,7 +29,7 @@ export function MainNav({
 
   if (!user) return null;
 
-  const isApprover = user.role === 'SUPERVISOR' || user.isManager === true;
+  const isApprover = user.role === 'SUPERVISOR';
   const isHR = user.role === 'HR';
 
   const routes = [
