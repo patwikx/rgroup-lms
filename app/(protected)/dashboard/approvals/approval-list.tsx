@@ -16,14 +16,17 @@ import { updateLeaveApproval } from "@/actions/leave-approval";
 import { toast } from "sonner";
 import { ApprovalDialog } from "./approval-dialog";
 import type { PendingApprovalWithDetails } from "@/types/type";
+import { useRouter } from "next/navigation";
 
 interface ApprovalsListProps {
   approvals: PendingApprovalWithDetails[];
 }
 
-export function ApprovalsList({ approvals }: ApprovalsListProps) {
+export function ApprovalsList({ approvals: initialApprovals }: ApprovalsListProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<PendingApprovalWithDetails | null>(null);
+  const [approvals, setApprovals] = useState<PendingApprovalWithDetails[]>(initialApprovals);
+  const router = useRouter();
 
   const handleAction = async (approvalId: string, status: 'APPROVED' | 'REJECTED', comment?: string) => {
     setLoading(approvalId);
@@ -39,10 +42,14 @@ export function ApprovalsList({ approvals }: ApprovalsListProps) {
         return;
       }
 
+      // Remove the approved/rejected request from the local state
+      setApprovals((current) => current.filter((approval) => approval.id !== approvalId));
       toast.success(`Leave request ${status.toLowerCase()} successfully`);
-      // Refresh the page to show updated data
-      window.location.reload();
+      
+      // Refresh the page data without full reload
+      router.refresh();
     } catch (error) {
+      console.error('Approval action error:', error);
       toast.error("Something went wrong");
     } finally {
       setLoading(null);
@@ -76,7 +83,7 @@ export function ApprovalsList({ approvals }: ApprovalsListProps) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {format(approval.leaveRequest.startDate, 'PP')} - {format(approval.leaveRequest.endDate, 'PP')}
+                  {format(new Date(approval.leaveRequest.startDate), 'PP')} - {format(new Date(approval.leaveRequest.endDate), 'PP')}
                   <br />
                   <span className="text-sm text-muted-foreground">
                     {approval.leaveRequest.leaveDay === 'FULL' ? 'Full Day' : 

@@ -39,10 +39,19 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
       const timer = setTimeout(() => {
         onClose()
         setApprovalStatus("idle")
+        setComment("") // Reset comment when dialog closes
       }, 1000)
       return () => clearTimeout(timer)
     }
   }, [approvalStatus, onClose])
+
+  // Reset comment when dialog opens with new request
+  useEffect(() => {
+    if (request) {
+      setComment("")
+      setApprovalStatus("idle")
+    }
+  }, [request])
 
   if (!request?.leaveRequest) return null
   const { leaveRequest } = request
@@ -70,7 +79,13 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
   }
 
   return (
-    <Dialog open={!!request} onOpenChange={onClose}>
+    <Dialog open={!!request} onOpenChange={() => {
+      if (!loading) {
+        onClose()
+        setComment("")
+        setApprovalStatus("idle")
+      }
+    }}>
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -259,6 +274,7 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
               onChange={(e) => setComment(e.target.value)}
               placeholder="Add your remarks..."
               className="min-h-[60px] text-sm"
+              disabled={loading || approvalStatus !== "idle"}
             />
           </div>
         </div>
@@ -277,8 +293,12 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
             >
               Reject
             </Button>
-            <Button onClick={handleApprove} disabled={loading || approvalStatus !== "idle"} className="px-5">
-              {approvalStatus === "success" ? "Approved" : "Approve"}
+            <Button 
+              onClick={handleApprove} 
+              disabled={loading || approvalStatus !== "idle"} 
+              className="px-5"
+            >
+              {loading ? "Processing..." : approvalStatus === "success" ? "Approved" : "Approve"}
             </Button>
           </div>
         </DialogFooter>
@@ -286,4 +306,3 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
     </Dialog>
   )
 }
-
