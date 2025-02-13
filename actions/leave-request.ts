@@ -6,17 +6,12 @@ import { calculateLeaveDays } from "@/lib/leave-calculator";
 import { LeaveRequestFormData, LeaveRequestSchema } from "@/schemas";
 import { LeaveStatus, ApprovalStatus, ApprovalLevel } from "@prisma/client";
 
-// Philippines is UTC+8
-const PH_OFFSET = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
-
 function toPhilippinesTime(date: Date): Date {
-  const utc = date.getTime() + (date.getTimezoneOffset() * 60 * 1000);
-  return new Date(utc + PH_OFFSET);
-}
-
-function fromPhilippinesTime(date: Date): Date {
-  const utc = date.getTime() - PH_OFFSET;
-  return new Date(utc - (date.getTimezoneOffset() * 60 * 1000));
+  // Create a new date object to avoid modifying the original
+  const newDate = new Date(date);
+  // Set the time to noon (12:00:00) to avoid any DST issues
+  newDate.setHours(12, 0, 0, 0);
+  return newDate;
 }
 
 export async function createLeaveRequest(data: FormData) {
@@ -43,14 +38,9 @@ export async function createLeaveRequest(data: FormData) {
     const startDateStr = data.get('startDate') as string;
     const endDateStr = data.get('endDate') as string;
 
-    // Convert dates to Philippines timezone and set to start of day
-    const startDatePH = toPhilippinesTime(new Date(startDateStr));
-    startDatePH.setHours(0, 0, 0, 0);
-    const startDate = fromPhilippinesTime(startDatePH);
-    
-    const endDatePH = toPhilippinesTime(new Date(endDateStr));
-    endDatePH.setHours(0, 0, 0, 0);
-    const endDate = fromPhilippinesTime(endDatePH);
+    // Parse dates and ensure they're set to noon
+    const startDate = toPhilippinesTime(new Date(startDateStr));
+    const endDate = toPhilippinesTime(new Date(endDateStr));
 
     const rawData = {
       leaveTypeId: data.get('leaveTypeId'),
@@ -78,8 +68,8 @@ export async function createLeaveRequest(data: FormData) {
       fields.leaveDay
     );
 
-    // Get current leave balance using Philippines time
-    const currentYear = toPhilippinesTime(new Date()).getFullYear();
+    // Get current leave balance
+    const currentYear = new Date().getFullYear();
     const leaveBalance = await prisma.leaveBalance.findFirst({
       where: {
         employeeId: employee.id,
@@ -142,7 +132,7 @@ export async function createLeaveRequest(data: FormData) {
 }
 
 export async function validateLeaveRequest(data: LeaveRequestFormData) {
-  const today = toPhilippinesTime(new Date());
+  const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const minNoticeDate = new Date(today);

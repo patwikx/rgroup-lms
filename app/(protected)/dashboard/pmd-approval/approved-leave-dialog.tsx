@@ -218,7 +218,7 @@ export function ApprovedLeaveDialog({ request, onClose }: ApprovedLeaveDialogPro
                 disabled={!pmdStatus || (pmdStatus === 'REJECTED' && !pmdRejectionReason) || isSubmitting}
                 className="w-full mt-3"
               >
-                {isSubmitting ? 'Updating...' : 'Approve Leave Request'}
+                {isSubmitting ? 'Updating...' : 'Update Leave Request'}
               </Button>
             </div>
           </div>

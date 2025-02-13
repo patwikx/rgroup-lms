@@ -1,4 +1,3 @@
-// prisma/schema.prisma
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
@@ -77,9 +76,11 @@ model Employee {
 
   user User @relation(fields: [empId], references: [id], onDelete: Cascade)
 
-  leaveBalances LeaveBalance[]
-  leaveRequests LeaveRequest[]
-  approvals     LeaveApproval[]
+  leaveBalances     LeaveBalance[]
+  leaveRequests     LeaveRequest[]
+  approvals         LeaveApproval[]
+  overtimes         Overtime[]
+  overtimeApprovals OvertimeApproval[]
 
   // New fields for many-to-one approver relationship
   approverId   String?
@@ -162,6 +163,42 @@ model LeaveApproval {
   @@unique([leaveRequestId, level])
 }
 
+// New Overtime Models
+model Overtime {
+  id              String         @id @default(cuid())
+  employeeId      String
+  date            DateTime       @db.Date
+  startTime       DateTime
+  endTime         DateTime
+  totalHours      Float
+  reason          String
+  status          OvertimeStatus @default(PENDING)
+  rejectionReason String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  employee  Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  approvals OvertimeApproval[]
+
+  @@index([status])
+}
+
+model OvertimeApproval {
+  id         String         @id @default(cuid())
+  overtimeId String
+  approverId String
+  level      ApprovalLevel
+  status     ApprovalStatus @default(PENDING)
+  comment    String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  overtime Overtime @relation(fields: [overtimeId], references: [id], onDelete: Cascade)
+  approver Employee @relation(fields: [approverId], references: [id])
+
+  @@unique([overtimeId, level])
+}
+
 enum LeaveDay {
   FULL
   FIRST_HALF
@@ -185,4 +222,11 @@ enum ApprovalStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum OvertimeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
 }

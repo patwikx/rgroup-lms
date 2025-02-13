@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Activity, CalendarCheck, FileText, History, ChevronDown, Settings, Users2, FileArchive, AlertCircle } from 'lucide-react';
+import { Activity, CalendarCheck, FileText, History, ChevronDown, Settings, Users2, FileArchive, AlertCircle, TimerIcon } from 'lucide-react';
 
 import { cn } from "@/lib/utils"
 import {
@@ -38,6 +38,12 @@ export function MainNav({
       label: 'Pending Leave Requests',
       icon: FileText,
       active: pathname === `/dashboard/pending-requests`,
+    },
+    {
+      href: `/dashboard/overtime`,
+      label: 'Overtime Filing',
+      icon: TimerIcon,
+      active: pathname === `/dashboard/overtime`,
     },
     {
       href: `/dashboard/leave-history`,
