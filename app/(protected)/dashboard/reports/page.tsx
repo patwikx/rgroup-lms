@@ -5,7 +5,7 @@ import { getLeaveRequests } from '@/actions/leave-reports';
 import { LeaveRequestsReport } from './components/leave-request-report';
 
 export const metadata: Metadata = {
-  title: 'RDHFSI Leave Requests Report',
+  title: 'RD Realty Leave Requests Report',
   description: 'View and manage leave request reports',
 };
 

@@ -4,7 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Menu, ChevronDown, FileText, CalendarCheck, FileArchive, Settings, Users2, History, LogOut } from 'lucide-react'
+import { Menu, ChevronDown, FileText, CalendarCheck, FileArchive, Settings, Users2, History, LogOut, Timer } from 'lucide-react'
 import { signOut } from "next-auth/react"
 
 import { cn } from "@/lib/utils"
@@ -37,6 +37,12 @@ export function SideBarNav() {
           label: 'Pending Leave Requests',
           icon: FileText,
           description: "View pending leave requests"
+        },
+        {
+          href: "/dashboard/overtime",
+          label: 'Overtime',
+          icon: Timer,
+          description: "Overtime Filing / Approval"
         },
         {
           href: "/dashboard/leave-history",

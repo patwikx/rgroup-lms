@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { replenishLeaveBalances } from "@/actions/leave-settings";
 import { balanceColumns } from "./leave-balances-columns";
 
+
 interface LeaveBalanceManagementProps {
   initialBalances: any[];
 }

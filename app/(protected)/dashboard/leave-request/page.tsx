@@ -1,5 +1,11 @@
 import { getLeaveTypes } from "@/actions/leave-type";
 import { LeaveRequestForm } from "./form";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'RD Realty Employee Leave Requests',
+  description: 'Manage system users and their access',
+};
 
 export default async function LeaveRequestPage() {
   const leaveTypes = await getLeaveTypes();

@@ -1,14 +1,7 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+import { useState, useEffect } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
@@ -20,8 +13,8 @@ import { cn } from "@/lib/utils"
 interface ApprovalDialogProps {
   request: PendingApprovalWithDetails | null
   onClose: () => void
-  onApprove: (comment: string) => Promise<void>
-  onReject: (comment: string) => Promise<void>
+  onApprove: (comment: string) => void
+  onReject: (comment: string) => void
   loading: boolean
 }
 
@@ -39,34 +32,42 @@ const formatDate = (date: string | Date | null) => {
 
 export function ApprovalDialog({ request, onClose, onApprove, onReject, loading }: ApprovalDialogProps) {
   const [comment, setComment] = useState("")
-  const [localLoading, setLocalLoading] = useState(false)
+  const [approvalStatus, setApprovalStatus] = useState<"idle" | "success" | "error">("idle")
 
-  const handleApprove = useCallback(async () => {
-    try {
-      setLocalLoading(true)
-      await onApprove(comment)
-      onClose()
-    } catch (error) {
-      console.error("Approval error:", error)
-    } finally {
-      setLocalLoading(false)
+  useEffect(() => {
+    if (approvalStatus === "success") {
+      const timer = setTimeout(() => {
+        onClose()
+        setApprovalStatus("idle")
+      }, 1000)
+      return () => clearTimeout(timer)
     }
-  }, [comment, onApprove, onClose])
-
-  const handleReject = useCallback(async () => {
-    try {
-      setLocalLoading(true)
-      await onReject(comment)
-      onClose()
-    } catch (error) {
-      console.error("Rejection error:", error)
-    } finally {
-      setLocalLoading(false)
-    }
-  }, [comment, onReject, onClose])
+  }, [approvalStatus, onClose])
 
   if (!request?.leaveRequest) return null
   const { leaveRequest } = request
+
+  const handleApprove = async () => {
+    try {
+      setApprovalStatus("idle")
+      await onApprove(comment)
+      setApprovalStatus("success")
+    } catch (error) {
+      console.error("Approval error:", error)
+      setApprovalStatus("error")
+    }
+  }
+
+  const handleReject = async () => {
+    try {
+      setApprovalStatus("idle")
+      await onReject(comment)
+      setApprovalStatus("success")
+    } catch (error) {
+      console.error("Rejection error:", error)
+      setApprovalStatus("error")
+    }
+  }
 
   return (
     <Dialog open={!!request} onOpenChange={onClose}>
@@ -268,11 +269,16 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
             Your decision cannot be changed once submitted
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleReject} disabled={loading || localLoading} className="px-5">
+            <Button
+              variant="outline"
+              onClick={handleReject}
+              disabled={loading || approvalStatus !== "idle"}
+              className="px-5"
+            >
               Reject
             </Button>
-            <Button onClick={handleApprove} disabled={loading || localLoading} className="px-5">
-              Approve
+            <Button onClick={handleApprove} disabled={loading || approvalStatus !== "idle"} className="px-5">
+              {approvalStatus === "success" ? "Approved" : "Approve"}
             </Button>
           </div>
         </DialogFooter>

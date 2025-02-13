@@ -6,6 +6,13 @@ import PendingLeaveRequestsTable from "./pending-leave-reqeust-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: 'RD Realty Employee Pending Requests',
+  description: 'Manage system users and their access',
+};
 
 export default async function PendingLeaveRequestsPage() {
   const session = await auth();

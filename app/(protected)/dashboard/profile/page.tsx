@@ -7,7 +7,7 @@ import { auth } from "@/auth";
 import ProfileForm from "./components/profile-form";
 
 export const metadata: Metadata = {
-  title: "Profile Settings | Employee Portal",
+  title: "RD Realty Profile Settings | Employee Portal",
   description: "Manage your profile settings and personal information",
 };
 

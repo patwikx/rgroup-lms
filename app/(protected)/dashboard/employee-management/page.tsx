@@ -5,7 +5,7 @@ import { UserManagement } from './user-management';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const metadata: Metadata = {
-  title: 'RDHFSI User Management',
+  title: 'RD Realty Employee Management',
   description: 'Manage system users and their access',
 };
 

@@ -1,11 +1,35 @@
 import { ColumnDef } from "@tanstack/react-table";
-
-import { Input } from "@/components/ui/input";
 import { DataTableColumnHeader } from "@/components/ui/data-table-column-header";
-import { updateLeaveBalance } from "@/actions/leave-settings";
+import { EditableLeaveBalance } from "./editable-annual-allowance";
+import { Checkbox } from "@/components/ui/checkbox";
 
 
 export const balanceColumns: ColumnDef<any>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={table.getIsAllPageRowsSelected()}
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "employee.employeeId",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="First Name" />
+    ),
+  },
   {
     accessorKey: "employee.firstName",
     header: ({ column }) => (
@@ -30,17 +54,9 @@ export const balanceColumns: ColumnDef<any>[] = [
       <DataTableColumnHeader column={column} title="Balance" />
     ),
     cell: ({ row }) => (
-      <Input
-        type="number"
-        defaultValue={row.original.balance}
-        className="w-24"
-        onChange={(e) => {
-          // Handle balance update through server action
-          const newBalance = parseFloat(e.target.value);
-          if (!isNaN(newBalance)) {
-            updateLeaveBalance(row.original.id, newBalance);
-          }
-        }}
+      <EditableLeaveBalance 
+        id={row.original.id} 
+        initialBalance={row.original.balance} 
       />
     ),
   },

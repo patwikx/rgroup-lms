@@ -28,13 +28,21 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { updateProfile } from "@/actions/profile-page";
+import { updateProfile, changePassword } from "@/actions/profile-page";
 import { Badge } from "@/components/ui/badge";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import Image from "next/image";
 
 const profileSchema = z.object({
@@ -48,7 +56,17 @@ const profileSchema = z.object({
   address: z.string().optional(),
 });
 
+const passwordSchema = z.object({
+  currentPassword: z.string().min(6, "Current password is required"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password confirmation is required"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 type ProfileFormValues = z.infer<typeof profileSchema>;
+type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 interface ProfileFormProps {
   initialData: Employee & {
@@ -65,6 +83,7 @@ interface ProfileFormProps {
 
 export default function ProfileForm({ initialData }: ProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -77,6 +96,15 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
       phoneNumber: initialData.contactNo || "",
       emergencyContact: initialData.emergencyContactNo || "",
       address: initialData.address || "",
+    },
+  });
+
+  const passwordForm = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -99,6 +127,26 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
       setIsLoading(false);
     }
   }
+
+  async function onPasswordSubmit(data: PasswordFormValues) {
+    try {
+      setIsLoading(true);
+      const result = await changePassword(data);
+      
+      if (result.success) {
+        toast.success("Password changed successfully");
+        passwordForm.reset();
+        setIsPasswordDialogOpen(false);
+      } else {
+        toast.error(result.error || "Something went wrong");
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
 
   return (
     <Tabs defaultValue="general" className="space-y-6">
@@ -323,7 +371,7 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                   />
                   <div>
                     <FormLabel>Employee ID</FormLabel>
-                    <Input value={initialData.empId} disabled />
+                    <Input value={initialData.employeeId || ''} disabled />
                   </div>
                   <div>
                     <FormLabel>Joining Date</FormLabel>
@@ -377,7 +425,75 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                         Update your password regularly to keep your account secure
                       </p>
                     </div>
-                    <Button variant="outline">Update</Button>
+                    <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline">Update</Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Change Password</DialogTitle>
+                          <DialogDescription>
+                            Enter your current password and choose a new one
+                          </DialogDescription>
+                        </DialogHeader>
+                        <Form {...passwordForm}>
+                          <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+                            <FormField
+                              control={passwordForm.control}
+                              name="currentPassword"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Current Password</FormLabel>
+                                  <FormControl>
+                                    <Input type="password" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={passwordForm.control}
+                              name="newPassword"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>New Password</FormLabel>
+                                  <FormControl>
+                                    <Input type="password" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={passwordForm.control}
+                              name="confirmPassword"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Confirm New Password</FormLabel>
+                                  <FormControl>
+                                    <Input type="password" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <div className="flex justify-end space-x-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsPasswordDialogOpen(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button type="submit" disabled={isLoading}>
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Change Password
+                              </Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">

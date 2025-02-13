@@ -2,6 +2,12 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { ApprovedLeavesList } from "./approved-leaves-list";
 import { auth } from "@/auth";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'RD Realty Employee PMD Approval',
+  description: 'Manage system users and their access',
+};
 
 export default async function ApprovedLeavesPage() {
   const session = await auth();

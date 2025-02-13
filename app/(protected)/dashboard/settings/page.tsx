@@ -4,6 +4,12 @@ import { LeaveTypesList } from "./components/leave-types-list";
 import { LeaveBalanceManagement } from "./components/leave-balance-management";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'RD Realty Employee Settings',
+  description: 'Manage system users and their access',
+};
 
 export default async function LeaveSettingsPage() {
 
@@ -23,6 +29,7 @@ export default async function LeaveSettingsPage() {
     include: {
       employee: {
         select: {
+          employeeId: true,
           firstName: true,
           lastName: true,
         },
