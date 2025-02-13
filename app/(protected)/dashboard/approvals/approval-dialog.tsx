@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { Calendar, Clock, MapPin, User, Briefcase, AlertCircle, Check, X } from "lucide-react";
 import type { PendingApprovalWithDetails } from "@/types/type";
 import { cn } from "@/lib/utils";
@@ -19,9 +19,22 @@ interface ApprovalDialogProps {
   loading: boolean;
 }
 
+// Helper function to safely format dates
+const formatDate = (date: string | Date | null) => {
+  if (!date) return '';
+  try {
+    const dateObj = typeof date === 'string' ? parseISO(date) : date;
+    return format(dateObj, 'MMM d, yyyy');
+  } catch (error) {
+    console.error('Date formatting error:', error);
+    return 'Invalid date';
+  }
+};
+
 export function ApprovalDialog({ request, onClose, onApprove, onReject, loading }: ApprovalDialogProps) {
   const [comment, setComment] = useState("");
-  if (!request) return null;
+  
+  if (!request?.leaveRequest) return null;
   const { leaveRequest } = request;
 
   return (
@@ -32,11 +45,11 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
             <div>
               <DialogTitle className="text-lg">Leave Request Review</DialogTitle>
               <DialogDescription className="text-sm mt-0.5">
-                Request #{request.id.slice(-8).toUpperCase()}
+                Request #{request.id ? request.id.slice(-8).toUpperCase() : 'N/A'}
               </DialogDescription>
             </div>
-            <Badge variant={leaveRequest.leaveType.isPaid ? "default" : "secondary"} className="ml-2">
-              {leaveRequest.leaveType.isPaid ? "Paid Leave" : "Unpaid Leave"}
+            <Badge variant={leaveRequest.leaveType?.isPaid ? "default" : "secondary"} className="ml-2">
+              {leaveRequest.leaveType?.isPaid ? "Paid Leave" : "Unpaid Leave"}
             </Badge>
           </div>
         </DialogHeader>
@@ -52,16 +65,16 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-sm">
-                    {leaveRequest.employee.firstName} {leaveRequest.employee.lastName}
+                    {leaveRequest.employee?.firstName} {leaveRequest.employee?.lastName}
                   </h4>
                   <div className="text-sm text-muted-foreground flex items-center gap-4 mt-0.5">
                     <span className="flex items-center gap-1.5">
                       <Briefcase className="h-3.5 w-3.5" />
-                      {leaveRequest.employee.position}
+                      {leaveRequest.employee?.position || 'N/A'}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <MapPin className="h-3.5 w-3.5" />
-                      {leaveRequest.employee.department}
+                      {leaveRequest.employee?.department || 'N/A'}
                     </span>
                   </div>
                 </div>
@@ -76,18 +89,20 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-muted-foreground">Type</label>
-                  <p className="font-medium mt-0.5">{leaveRequest.leaveType.name}</p>
+                  <p className="font-medium mt-0.5">{leaveRequest.leaveType?.name || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-sm text-muted-foreground">Duration</label>
-                  <p className="font-medium mt-0.5">{leaveRequest.daysRequested.toString()} day(s)</p>
+                  <p className="font-medium mt-0.5">{leaveRequest.daysRequested?.toString() || 'N/A'} day(s)</p>
                 </div>
               </div>
               
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span>{format(leaveRequest.startDate, 'MMM d')} - {format(leaveRequest.endDate, 'MMM d, yyyy')}</span>
+                  <span>
+                    {formatDate(leaveRequest.startDate)} - {formatDate(leaveRequest.endDate)}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
@@ -100,7 +115,7 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
 
               <div>
                 <label className="text-sm text-muted-foreground block mb-1">Reason for Leave</label>
-                <div className="text-sm">{leaveRequest.reason}</div>
+                <div className="text-sm">{leaveRequest.reason || 'No reason provided'}</div>
               </div>
             </div>
           </div>
@@ -124,17 +139,17 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
                   {leaveRequest.status === 'REJECTED' && <X className="h-3 w-3" />}
                   {leaveRequest.status}
                 </div>
-                {leaveRequest.status === 'PENDING' && (
+                {leaveRequest.status === 'PENDING' && leaveRequest.approvals && (
                   <span className="text-sm text-muted-foreground">
-                    Awaiting {leaveRequest.approvals.find(a => a.status === 'PENDING')?.level.toLowerCase()} approval
+                    Awaiting {leaveRequest.approvals.find(a => a.status === 'PENDING')?.level?.toLowerCase() || 'approval'}
                   </span>
                 )}
               </div>
               
               <div className="relative flex items-center justify-center max-w-[300px] mx-auto">
                 {[
-                  { level: 'SUPERVISOR', label: 'Supervisor', status: leaveRequest.approvals.find(a => a.level === 'SUPERVISOR')?.status || 'PENDING' },
-                  { level: 'HR', label: 'HR', status: leaveRequest.approvals.find(a => a.level === 'HR')?.status || 'PENDING' }
+                  { level: 'SUPERVISOR', label: 'Supervisor', status: leaveRequest.approvals?.find(a => a.level === 'SUPERVISOR')?.status || 'PENDING' },
+                  { level: 'HR', label: 'HR', status: leaveRequest.approvals?.find(a => a.level === 'HR')?.status || 'PENDING' }
                 ].map((step, index) => (
                   <div key={step.level} className="flex items-center flex-1">
                     <div className="flex flex-col items-center relative">
@@ -142,7 +157,7 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
                         "w-7 h-7 rounded-full flex items-center justify-center border-2 transition-colors duration-200",
                         step.status === 'APPROVED' && "bg-primary border-primary text-primary-foreground",
                         step.status === 'REJECTED' && "bg-destructive border-destructive text-destructive-foreground",
-                        step.status === 'PENDING' && leaveRequest.approvals.find(a => a.status === 'PENDING')?.level === step.level
+                        step.status === 'PENDING' && leaveRequest.approvals?.find(a => a.status === 'PENDING')?.level === step.level
                           ? "bg-white border-yellow-400 text-yellow-600"
                           : step.status === 'PENDING' && "bg-white border-muted-foreground/30 text-muted-foreground"
                       )}>
@@ -157,7 +172,7 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
                         "mt-0.5 text-[11px]",
                         step.status === 'APPROVED' && "text-primary",
                         step.status === 'REJECTED' && "text-destructive",
-                        step.status === 'PENDING' && leaveRequest.approvals.find(a => a.status === 'PENDING')?.level === step.level
+                        step.status === 'PENDING' && leaveRequest.approvals?.find(a => a.status === 'PENDING')?.level === step.level
                           ? "text-yellow-600"
                           : "text-muted-foreground"
                       )}>
