@@ -75,7 +75,7 @@ export function ApprovalsList({ approvals: initialApprovals }: ApprovalsListProp
             {approvals.map((approval) => (
               <TableRow key={approval.id}>
                 <TableCell className="font-medium">
-                  {approval.leaveRequest.employee.firstName} {approval.leaveRequest.employee.lastName}
+                  {approval.leaveRequest.user.firstName} {approval.leaveRequest.user.lastName}
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary">

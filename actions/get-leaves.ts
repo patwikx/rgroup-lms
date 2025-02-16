@@ -26,7 +26,7 @@ export async function getLeaves(from?: string, to?: string) {
   return prisma.leaveRequest.findMany({
     where: dateFilter,
     include: {
-      employee: true,
+      user: true,
       leaveType: true,
       approvals: {
         include: {

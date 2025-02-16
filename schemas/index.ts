@@ -1,4 +1,4 @@
-import { LeaveDay } from "@prisma/client";
+import { ApprovalLevel, LeaveDay } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import * as z from "zod";
 
@@ -54,18 +54,24 @@ export const LoginSchema = z.object({
 });
 
 export const EmployeeSchema = z.object({
-  employeeId: z.string().min(1, "Employee ID is required"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(100, "Password must be less than 100 characters"),
   department: z.string().min(1, "Department is required"),
   position: z.string().min(1, "Position is required"),
   isManager: z.boolean().default(false),
   isHR: z.boolean().default(false),
   isTWC: z.boolean().default(false),
-  supervisorId: z.string().min(1, "Supervisor is required"),
-  role: z.enum(["USER", "SUPERVISOR", "HR"]).default("USER"),
+  supervisorId: z.string().optional(),
+  role: z.nativeEnum(ApprovalLevel).default(ApprovalLevel.USER),
+  employeeId: z.string().optional(),
+  contactNo: z.string().optional(),
+  address: z.string().optional(),
+  emergencyContactNo: z.string().optional(),
 });
 
 export type EmployeeFormData = z.infer<typeof EmployeeSchema>;

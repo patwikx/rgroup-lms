@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 
 export async function getAvailableApprovers() {
   try {
-    const approvers = await prisma.employee.findMany({
+    const approvers = await prisma.user.findMany({
       where: {
         OR: [
           { isManager: true },
@@ -17,19 +17,18 @@ export async function getAvailableApprovers() {
         id: true,
         firstName: true,
         lastName: true,
-        position: true,
         department: true,
+        position: true,
         isManager: true,
-        isHR: true
-      },
-      orderBy: {
-        firstName: 'asc'
+        isHR: true,
+        isTWC: true,
+        role: true
       }
     });
-    
+
     return approvers;
   } catch (error) {
     console.error('Error fetching approvers:', error);
-    return [];
+    throw new Error('Failed to fetch approvers');
   }
 }

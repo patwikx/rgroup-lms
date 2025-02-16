@@ -25,6 +25,34 @@ import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { updateUserDetails, getAvailableApprovers } from '@/actions/employee-management';
 import { useRouter } from 'next/navigation';
+import { ApprovalLevel } from '@prisma/client';
+
+interface Approver {
+  id: string;
+  firstName: string;
+  lastName: string;
+  position: string | null;
+  role: ApprovalLevel;
+}
+
+interface UserDetailsFormProps {
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    department?: string;
+    position?: string;
+    approverId?: string;
+    role: ApprovalLevel;
+    approver?: {
+      firstName: string;
+      lastName: string;
+      position: string | null;
+    } | null;
+  };
+  onSuccess: (updatedUser: any) => void;
+}
 
 const formSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -35,18 +63,6 @@ const formSchema = z.object({
   approverId: z.string().optional(),
 });
 
-interface Approver {
-  id: string;
-  firstName: string;
-  lastName: string;
-  position: string;
-}
-
-interface UserDetailsFormProps {
-  user: any;
-  onSuccess: (updatedUser: any) => void;
-}
-
 export function UserDetailsForm({ user, onSuccess }: UserDetailsFormProps) {
   const [approvers, setApprovers] = useState<Approver[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -55,26 +71,24 @@ export function UserDetailsForm({ user, onSuccess }: UserDetailsFormProps) {
   useEffect(() => {
     const fetchApprovers = async () => {
       try {
-        if (user?.employee?.id) {
-          const availableApprovers = await getAvailableApprovers(user.employee.id);
-          setApprovers(availableApprovers);
-        }
+        const availableApprovers = await getAvailableApprovers(user.id);
+        setApprovers(availableApprovers);
       } catch (error) {
         toast.error('Failed to fetch approvers');
       }
     };
     fetchApprovers();
-  }, [user?.employee?.id]);
+  }, [user.id]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: user?.employee?.firstName || '',
-      lastName: user?.employee?.lastName || '',
-      email: user?.email || '',
-      department: user?.employee?.department || '',
-      position: user?.employee?.position || '',
-      approverId: user?.employee?.approverId || '',
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      department: user.department || '',
+      position: user.position || '',
+      approverId: user.approverId || '',
     },
   });
 
@@ -83,7 +97,7 @@ export function UserDetailsForm({ user, onSuccess }: UserDetailsFormProps) {
       setIsLoading(true);
       const result = await updateUserDetails(user.id, {
         ...values,
-        approvalLevel: user?.employee?.approvalLevel || 'USER',
+        role: user.role,
       });
 
       if (result.success) {
@@ -93,21 +107,13 @@ export function UserDetailsForm({ user, onSuccess }: UserDetailsFormProps) {
 
         const updatedUser = {
           ...user,
-          email: values.email,
-          name: `${values.firstName} ${values.lastName}`,
-          employee: {
-            ...user.employee,
-            firstName: values.firstName,
-            lastName: values.lastName,
-            department: values.department,
-            position: values.position,
-            approverId: values.approverId === 'no-approver' ? null : values.approverId,
-            approver: selectedApprover ? {
-              firstName: selectedApprover.firstName,
-              lastName: selectedApprover.lastName,
-              position: selectedApprover.position,
-            } : null
-          }
+          ...values,
+          approverId: values.approverId === 'no-approver' ? null : values.approverId,
+          approver: selectedApprover ? {
+            firstName: selectedApprover.firstName,
+            lastName: selectedApprover.lastName,
+            position: selectedApprover.position,
+          } : null
         };
 
         toast.success('User details updated successfully');
@@ -207,7 +213,7 @@ export function UserDetailsForm({ user, onSuccess }: UserDetailsFormProps) {
                   <SelectItem value="no-approver">No Approver</SelectItem>
                   {approvers.map((approver) => (
                     <SelectItem key={approver.id} value={approver.id}>
-                      {approver.firstName} {approver.lastName} - {approver.position}
+                      {approver.firstName} {approver.lastName} - {approver.position || 'No Position'}
                     </SelectItem>
                   ))}
                 </SelectContent>

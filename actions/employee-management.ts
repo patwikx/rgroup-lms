@@ -5,21 +5,16 @@ import { prisma } from '@/lib/db';
 import { hash } from 'bcryptjs';
 import { ApprovalLevel } from '@prisma/client';
 
-
 export async function getUsers() {
   try {
     const users = await prisma.user.findMany({
       orderBy: { updatedAt: 'desc' },
       include: {
-        employee: {
-          include: {
-            approver: {
-              select: {
-                firstName: true,
-                lastName: true,
-                position: true
-              }
-            }
+        approver: {
+          select: {
+            firstName: true,
+            lastName: true,
+            position: true
           }
         }
       }
@@ -30,16 +25,16 @@ export async function getUsers() {
   }
 }
 
-export async function getAvailableApprovers(employeeId: string) {
+export async function getAvailableApprovers(userId: string) {
   try {
-    const approvers = await prisma.employee.findMany({
+    const approvers = await prisma.user.findMany({
       where: {
         isActive: true,
-        approvalLevel: {
+        role: {
           in: [ApprovalLevel.SUPERVISOR, ApprovalLevel.HR]
         },
         id: {
-          not: employeeId // Exclude the current employee
+          not: userId // Exclude the current user
         }
       },
       select: {
@@ -47,7 +42,7 @@ export async function getAvailableApprovers(employeeId: string) {
         firstName: true,
         lastName: true,
         position: true,
-        approvalLevel: true
+        role: true
       }
     });
     return approvers;
@@ -65,58 +60,39 @@ export async function updateUserDetails(
     department: string;
     position: string;
     approverId?: string | null;
-    approvalLevel: ApprovalLevel;
+    role: ApprovalLevel;
   }
 ) {
-  const { firstName, lastName, email, department, position, approverId, approvalLevel } = data;
+  const { firstName, lastName, email, department, position, approverId, role } = data;
 
   try {
-    const [updatedUser] = await prisma.$transaction(async (tx) => {
-      // Update user details
-      const user = await tx.user.update({
-        where: { id: userId },
-        data: {
-          name: `${firstName} ${lastName}`,
-          email,
-          role: approvalLevel,
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        firstName,
+        lastName,
+        email,
+        department,
+        position,
+        approverId,
+        role,
+        isManager: role === ApprovalLevel.SUPERVISOR,
+        isHR: role === ApprovalLevel.HR,
+      },
+      include: {
+        approver: {
+          select: {
+            firstName: true,
+            lastName: true,
+            position: true,
+          }
         },
-        include: {
-          employee: {
-            include: {
-              approver: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  position: true,
-                }
-              },
-              leaveBalances: {
-                include: {
-                  leaveType: true,
-                }
-              }
-            }
+        leaveBalances: {
+          include: {
+            leaveType: true,
           }
         }
-      });
-
-      // Update employee details
-      const employee = await tx.employee.update({
-        where: { empId: userId },
-        data: {
-          firstName,
-          lastName,
-          email,
-          department,
-          position,
-          approverId,
-          approvalLevel,
-          isManager: approvalLevel === ApprovalLevel.SUPERVISOR,
-          isHR: approvalLevel === ApprovalLevel.HR,
-        },
-      });
-
-      return [user];
+      }
     });
 
     revalidatePath('/dashboard/employee-management');
@@ -142,16 +118,8 @@ export async function updateUserPassword(userId: string, newPassword: string) {
 
 export async function toggleUserStatus(userId: string, isActive: boolean) {
   try {
-    const employee = await prisma.employee.findFirst({
-      where: { empId: userId },
-    });
-
-    if (!employee) {
-      throw new Error('Employee not found');
-    }
-
-    await prisma.employee.update({
-      where: { id: employee.id },
+    await prisma.user.update({
+      where: { id: userId },
       data: { isActive },
     });
 
@@ -163,11 +131,11 @@ export async function toggleUserStatus(userId: string, isActive: boolean) {
   }
 }
 
-export async function getEmployeeLeaveBalances(employeeId: string) {
+export async function getUserLeaveBalances(userId: string) {
   try {
     const balances = await prisma.leaveBalance.findMany({
       where: {
-        employeeId: employeeId,
+        userId: userId,
         year: new Date().getFullYear()
       },
       include: {
@@ -185,14 +153,11 @@ export async function getUsersWithLeaveBalances() {
   const users = await getUsers();
   const usersWithBalances = await Promise.all(
     users.map(async (user) => {
-      if (user.employee) {
-        const leaveBalances = await getEmployeeLeaveBalances(user.employee.id);
-        return {
-          ...user,
-          leaveBalances
-        };
-      }
-      return { ...user, leaveBalances: [] };
+      const leaveBalances = await getUserLeaveBalances(user.id);
+      return {
+        ...user,
+        leaveBalances
+      };
     })
   );
   return usersWithBalances;

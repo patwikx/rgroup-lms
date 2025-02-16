@@ -40,9 +40,9 @@ export async function updateProfile(data: ProfileFormValues) {
 
     // Update both Employee and User models
     const [updatedEmployee, updatedUser] = await prisma.$transaction([
-      prisma.employee.update({
+      prisma.user.update({
         where: {
-          empId: session.user.id,
+          employeeId: session.user.employeeId,
         },
         data: {
           firstName: validatedData.firstName,
@@ -60,7 +60,8 @@ export async function updateProfile(data: ProfileFormValues) {
           id: session.user.id,
         },
         data: {
-          name: `${validatedData.firstName} ${validatedData.lastName}`,
+          firstName: validatedData.firstName,
+          lastName: validatedData.lastName
         },
       }),
     ]);

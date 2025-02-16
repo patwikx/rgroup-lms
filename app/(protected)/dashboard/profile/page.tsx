@@ -18,12 +18,11 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  const employee = await prisma.employee.findUnique({
+  const employee = await prisma.user.findUnique({
     where: {
-      empId: session.user.id,
+      employeeId: session.user.employeeId,
     },
     include: {
-      user: true,
       approver: true,
       subordinates: {
         select: {

@@ -7,16 +7,16 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { format } from "date-fns"
-import { Calendar, Clock, MapPin, User, Briefcase, AlertCircle, Check, X } from 'lucide-react'
+import { Calendar, Clock, MapPin, User as UserIcon, Briefcase, AlertCircle, Check, X } from 'lucide-react'
 import { cn } from "@/lib/utils"
-import { LeaveRequest, LeaveType, LeaveApproval, Employee } from "@prisma/client"
+import { LeaveRequest, LeaveType, LeaveApproval, User, LeaveStatus, ApprovalLevel, ApprovalStatus } from "@prisma/client"
 
 type PendingLeaveRequestWithRelations = LeaveRequest & {
   leaveType: LeaveType
   approvals: (LeaveApproval & {
-    approver: Employee
+    approver: User
   })[]
-  employee: Employee
+  user: User
 }
 
 interface LeaveDetailsDialogProps {
@@ -68,20 +68,20 @@ export function LeaveDetailsDialog({ request, onClose, onApprove, onReject }: Le
             <div className="bg-muted/50 p-3.5 rounded-lg">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-4 w-4 text-primary" />
+                  <UserIcon className="h-4 w-4 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-sm">
-                    {request.employee.firstName} {request.employee.lastName}
+                    {request.user.firstName} {request.user.lastName}
                   </h4>
                   <div className="text-sm text-muted-foreground flex items-center gap-4 mt-1">
                     <span className="flex items-center gap-1.5">
                       <Briefcase className="h-3.5 w-3.5" />
-                      {request.employee.position}
+                      {request.user.position}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <MapPin className="h-3.5 w-3.5" />
-                      {request.employee.department}
+                      {request.user.department}
                     </span>
                   </div>
                 </div>
@@ -100,7 +100,7 @@ export function LeaveDetailsDialog({ request, onClose, onApprove, onReject }: Le
                 </div>
                 <div>
                   <label className="text-sm text-muted-foreground">Duration</label>
-                  <p className="font-medium mt-0.5">{request.daysRequested.toString()} day(s)</p>
+                  <p className="font-medium mt-0.5">{request.daysRequested} day(s)</p>
                 </div>
               </div>
               
@@ -140,7 +140,7 @@ export function LeaveDetailsDialog({ request, onClose, onApprove, onReject }: Le
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
                   </span>}
-                  {request.status ==='APPROVED' && <Check className="h-3 w-3" />}
+                  {request.status === 'APPROVED' && <Check className="h-3 w-3" />}
                   {request.status === 'REJECTED' && <X className="h-3 w-3" />}
                   {request.status}
                 </div>
@@ -153,8 +153,8 @@ export function LeaveDetailsDialog({ request, onClose, onApprove, onReject }: Le
               
               <div className="relative flex items-center justify-center max-w-[300px] mx-auto">
                 {[
-                  { level: 'SUPERVISOR', label: 'Supervisor', status: request.approvals.find(a => a.level === 'SUPERVISOR')?.status || 'PENDING' },
-                  { level: 'HR', label: 'HR', status: request.approvals.find(a => a.level === 'HR')?.status || 'PENDING' }
+                  { level: 'SUPERVISOR' as ApprovalLevel, label: 'Supervisor', status: request.approvals.find(a => a.level === 'SUPERVISOR')?.status || 'PENDING' },
+                  { level: 'HR' as ApprovalLevel, label: 'HR', status: request.approvals.find(a => a.level === 'HR')?.status || 'PENDING' }
                 ].map((step, index) => (
                   <div key={step.level} className="flex items-center flex-1">
                     <div className="flex flex-col items-center relative">

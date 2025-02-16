@@ -13,7 +13,7 @@ export async function getUserLeaveHistory(status?: LeaveStatus) {
     }
 
     // Get employee details from user email
-    const employee = await prisma.employee.findFirst({
+    const employee = await prisma.user.findFirst({
       where: {
         email: session.user.email
       }
@@ -25,7 +25,7 @@ export async function getUserLeaveHistory(status?: LeaveStatus) {
 
     const requests = await prisma.leaveRequest.findMany({
       where: {
-        employeeId: employee.id,
+        userId: employee.id,
         ...(status && { status })
       },
       select: {

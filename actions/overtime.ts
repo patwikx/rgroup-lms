@@ -1,4 +1,3 @@
-
 'use server'
 
 import { prisma } from "@/lib/db"
@@ -8,7 +7,7 @@ import { auth } from "@/auth"
 
 type OvertimeWithRelations = Prisma.OvertimeGetPayload<{
     include: {
-      employee: true
+      user: true
       approvals: {
         include: {
           approver: true
@@ -17,7 +16,7 @@ type OvertimeWithRelations = Prisma.OvertimeGetPayload<{
     }
   }>
 
-// Get overtime requests for the logged-in employee
+// Get overtime requests for the logged-in user
 export async function getMyOvertimeRequests(): Promise<OvertimeWithRelations[]> {
     try {
       const session = await auth()
@@ -25,21 +24,14 @@ export async function getMyOvertimeRequests(): Promise<OvertimeWithRelations[]> 
         throw new Error("Unauthorized: Please sign in to continue")
       }
   
-      const employee = await prisma.employee.findFirst({
-        where: { employeeId: session.user.employeeId },
-      })
-      if (!employee) {
-        throw new Error("Employee record not found")
-      }
-  
       return await prisma.overtime.findMany({
-        where: { employeeId: employee.id },
+        where: { userId: session.user.id },
         orderBy: [
           { date: "desc" },
           { createdAt: "desc" }
         ],
         include: {
-          employee: true,
+          user: true,
           approvals: {
             include: {
               approver: true,
@@ -53,7 +45,7 @@ export async function getMyOvertimeRequests(): Promise<OvertimeWithRelations[]> 
     }
   }
 
-  // Get overtime requests pending approval for the supervisor
+// Get overtime requests pending approval for the supervisor
 export async function getPendingApprovals(): Promise<OvertimeWithRelations[]> {
     try {
       const session = await auth();
@@ -61,15 +53,8 @@ export async function getPendingApprovals(): Promise<OvertimeWithRelations[]> {
         throw new Error("Unauthorized: Please sign in to continue")
       }
   
-      const employee = await prisma.employee.findFirst({
-        where: { employeeId: session.user.employeeId },
-      })
-      if (!employee) {
-        throw new Error("Employee record not found")
-      }
-  
       // Only supervisors can see pending approvals
-      if (employee.approvalLevel !== "SUPERVISOR") {
+      if (session.user.role !== ApprovalLevel.SUPERVISOR) {
         throw new Error("Unauthorized: Only supervisors can view pending approvals")
       }
   
@@ -77,7 +62,7 @@ export async function getPendingApprovals(): Promise<OvertimeWithRelations[]> {
         where: {
           approvals: {
             some: {
-              approverId: employee.id,
+              approverId: session.user.id,
               status: "PENDING",
             },
           },
@@ -87,7 +72,7 @@ export async function getPendingApprovals(): Promise<OvertimeWithRelations[]> {
           { createdAt: "desc" }
         ],
         include: {
-          employee: true,
+          user: true,
           approvals: {
             include: {
               approver: true,
@@ -100,7 +85,6 @@ export async function getPendingApprovals(): Promise<OvertimeWithRelations[]> {
       throw new Error("Failed to fetch pending approvals")
     }
   }
-  
 
 export async function createOvertime(formData: FormData) {
   try {
@@ -109,14 +93,18 @@ export async function createOvertime(formData: FormData) {
       throw new Error("Unauthorized: Please sign in to continue")
     }
 
-    const employee = await prisma.employee.findFirst({
-      where: { employeeId: session.user.employeeId },
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
       include: {
         approver: true,
       },
     })
-    if (!employee) {
-      throw new Error("Employee record not found")
+    if (!user) {
+      throw new Error("User not found")
+    }
+
+    if (!user.approverId) {
+      throw new Error("No approver assigned")
     }
 
     // Get and validate form data
@@ -146,7 +134,7 @@ export async function createOvertime(formData: FormData) {
       // Create the overtime record
       const overtime = await tx.overtime.create({
         data: {
-          employeeId: employee.id,
+          userId: user.id,
           date,
           startTime,
           endTime,
@@ -156,21 +144,19 @@ export async function createOvertime(formData: FormData) {
         },
       })
 
-      // Create approval records based on employee's approver
-      if (employee.approverId) {
-        await tx.overtimeApproval.create({
-          data: {
-            overtimeId: overtime.id,
-            approverId: employee.approverId,
-            level: ApprovalLevel.SUPERVISOR,
-            status: "PENDING",
-          },
-        })
-      }
+      // Create approval records based on user's approver
+      await tx.overtimeApproval.create({
+        data: {
+          overtimeId: overtime.id,
+          approverId: user.approverId!,
+          level: user.approver?.role || ApprovalLevel.SUPERVISOR,
+          status: "PENDING",
+        },
+      })
 
-      // If employee's approver is not HR/TWC, create additional approval record
-      if (employee.approver && !employee.approver.isHR && !employee.approver.isTWC) {
-        const hrApprover = await tx.employee.findFirst({
+      // If user's approver is not HR/TWC, create additional approval record
+      if (user.approver && !user.approver.isHR && !user.approver.isTWC) {
+        const hrApprover = await tx.user.findFirst({
           where: { isHR: true },
         })
 
@@ -204,22 +190,15 @@ export async function approveOvertime(id: string) {
         throw new Error("Unauthorized: Please sign in to continue")
       }
   
-      const employee = await prisma.employee.findFirst({
-        where: { employeeId: session.user.employeeId },
-      })
-      if (!employee) {
-        throw new Error("Employee record not found")
-      }
-  
       // Verify the user is a supervisor
-      if (employee.approvalLevel !== "SUPERVISOR") {
+      if (session.user.role !== ApprovalLevel.SUPERVISOR) {
         throw new Error("Unauthorized: Only supervisors can approve overtime requests")
       }
   
       const overtime = await prisma.overtime.findUnique({
         where: { id },
         include: {
-          employee: true,
+          user: true,
         },
       })
   
@@ -231,9 +210,9 @@ export async function approveOvertime(id: string) {
         throw new Error("Can only approve pending overtime requests")
       }
   
-      // Verify the supervisor is the approver for this employee
-      if (overtime.employee.approverId !== employee.id) {
-        throw new Error("Unauthorized: You are not the supervisor for this employee")
+      // Verify the supervisor is the approver for this user
+      if (overtime.user.approverId !== session.user.id) {
+        throw new Error("Unauthorized: You are not the supervisor for this user")
       }
   
       // Update both the approval and overtime status
@@ -241,7 +220,7 @@ export async function approveOvertime(id: string) {
         prisma.overtimeApproval.updateMany({
           where: {
             overtimeId: id,
-            approverId: employee.id,
+            approverId: session.user.id,
           },
           data: {
             status: "APPROVED",
@@ -271,13 +250,6 @@ export async function cancelOvertime(id: string) {
       throw new Error("Unauthorized: Please sign in to continue")
     }
 
-    const employee = await prisma.employee.findFirst({
-      where: { employeeId: session.user.employeeId },
-    })
-    if (!employee) {
-      throw new Error("Employee record not found")
-    }
-
     const overtime = await prisma.overtime.findUnique({
       where: { id },
     })
@@ -286,14 +258,14 @@ export async function cancelOvertime(id: string) {
       throw new Error("Overtime request not found")
     }
 
-    // Only allow cancellation if it's the employee's own request or if they're HR/Manager
+    // Only allow cancellation if it's the user's own request or if they're HR/Manager
     if (
-      overtime.employeeId !== employee.id &&
-      !employee.isHR &&
-      !employee.isManager &&
-      !employee.isTWC
+      overtime.userId !== session.user.id &&
+      !session.user.isHR &&
+      !session.user.isManager &&
+      !session.user.isTWC
     ) {
-      throw new Error("Unauthorized: Cannot cancel other employee's overtime requests")
+      throw new Error("Unauthorized: Cannot cancel other user's overtime requests")
     }
 
     if (overtime.status !== "PENDING") {
@@ -337,22 +309,15 @@ export async function rejectOvertime(id: string) {
         throw new Error("Unauthorized: Please sign in to continue")
       }
   
-      const employee = await prisma.employee.findFirst({
-        where: { employeeId: session.user.employeeId },
-      })
-      if (!employee) {
-        throw new Error("Employee record not found")
-      }
-  
       // Verify the user is a supervisor
-      if (employee.approvalLevel !== "SUPERVISOR") {
+      if (session.user.role !== ApprovalLevel.SUPERVISOR) {
         throw new Error("Unauthorized: Only supervisors can reject overtime requests")
       }
   
       const overtime = await prisma.overtime.findUnique({
         where: { id },
         include: {
-          employee: true,
+          user: true,
         },
       })
   
@@ -364,9 +329,9 @@ export async function rejectOvertime(id: string) {
         throw new Error("Can only reject pending overtime requests")
       }
   
-      // Verify the supervisor is the approver for this employee
-      if (overtime.employee.approverId !== employee.id) {
-        throw new Error("Unauthorized: You are not the supervisor for this employee")
+      // Verify the supervisor is the approver for this user
+      if (overtime.user.approverId !== session.user.id) {
+        throw new Error("Unauthorized: You are not the supervisor for this user")
       }
   
       // Update both the approval and overtime status
@@ -374,7 +339,7 @@ export async function rejectOvertime(id: string) {
         prisma.overtimeApproval.updateMany({
           where: {
             overtimeId: id,
-            approverId: employee.id,
+            approverId: session.user.id,
           },
           data: {
             status: "REJECTED",

@@ -38,7 +38,7 @@ export default async function ApprovedLeavesPage() {
       pmdStatus: { not: 'REJECTED' }, // Exclude rejected PMD status
     },
     include: {
-      employee: true,
+      user: true,
       leaveType: true,
       approvals: {
         include: {

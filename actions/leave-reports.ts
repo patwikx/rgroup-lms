@@ -20,7 +20,7 @@ export async function getLeaveRequests(status?: LeaveStatus) {
         pmdRejectionReason: true,
         createdAt: true,
         updatedAt: true,
-        employee: {
+        user: {
           select: {
             employeeId: true,
             firstName: true,

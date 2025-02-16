@@ -13,13 +13,12 @@ import { ApproverCard } from './components/approver-card';
 import { SubordinatesCard } from './components/subordinates-card';
 
 export default async function DashboardPage() {
-  const [stats, balances, approvals, employee] = await Promise.all([
+  const [stats, balances, approvals, user] = await Promise.all([
     getDashboardStats(),
     getLeaveBalances(),
     getPendingApprovals(),
     getEmployeeWithApproverAndSubordinates(),
   ]);
-
 
   return (
     <div className="container mx-auto space-y-6 mb-4">
@@ -39,9 +38,9 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ApproverCard approver={employee?.approver ?? null} />
-          {employee?.isManager && (
-            <SubordinatesCard subordinates={employee?.subordinates ?? []} />
+          <ApproverCard approver={user?.approver ?? null} />
+          {user?.isManager && (
+            <SubordinatesCard subordinates={user?.subordinates ?? []} />
           )}
         </div>
       </Suspense>

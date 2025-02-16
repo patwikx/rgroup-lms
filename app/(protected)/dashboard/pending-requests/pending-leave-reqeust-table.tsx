@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { LeaveRequest, LeaveType, LeaveApproval, Employee } from "@prisma/client"
+import { LeaveRequest, LeaveType, LeaveApproval, User, LeaveDay, LeaveStatus } from "@prisma/client"
 import {
   Table,
   TableBody,
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { format } from "date-fns"
-import { Calendar, Clock, MoreHorizontal, Search, AlertCircle } from 'lucide-react'
+import { Calendar, MoreHorizontal, Search, AlertCircle } from 'lucide-react'
 import { LeaveDetailsDialog } from "./leave-details-dialog"
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons"
 import { useRouter } from "next/navigation"
@@ -30,9 +30,9 @@ import { useRouter } from "next/navigation"
 type PendingLeaveRequestWithRelations = LeaveRequest & {
   leaveType: LeaveType
   approvals: (LeaveApproval & {
-    approver: Employee
+    approver: User
   })[]
-  employee: Employee
+  user: User
 }
 
 interface PendingLeaveRequestsTableProps {
@@ -58,7 +58,7 @@ export default function PendingLeaveRequestsTable({
 
   const totalPages = Math.ceil(filteredRequests.length / itemsPerPage)
 
-  const getLeaveDayLabel = (leaveDay: string) => {
+  const getLeaveDayLabel = (leaveDay: LeaveDay) => {
     switch (leaveDay) {
       case "FULL":
         return "Whole day"
@@ -83,7 +83,7 @@ export default function PendingLeaveRequestsTable({
     setSelectedRequest(null)
   }
 
-  const router = useRouter();
+  const router = useRouter()
 
   return (
     <div className="space-y-4">
@@ -98,8 +98,8 @@ export default function PendingLeaveRequestsTable({
           />
         </div>
         <Button onClick={() => router.push('/dashboard/leave-request')}>
-        New Leave Request
-      </Button>
+          New Leave Request
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table>
@@ -127,7 +127,7 @@ export default function PendingLeaveRequestsTable({
                     </span>
                   </div>
                 </TableCell>
-                <TableCell>{request.daysRequested.toString()}</TableCell>
+                <TableCell>{request.daysRequested}</TableCell>
                 <TableCell>{getLeaveDayLabel(request.leaveDay)}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">{request.status}</Badge>

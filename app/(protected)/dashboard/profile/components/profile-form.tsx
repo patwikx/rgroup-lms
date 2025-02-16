@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Loader2, Camera, Shield, Users, Info } from "lucide-react";
-import { Employee, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import {
   Card,
   CardContent,
@@ -69,14 +69,13 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 interface ProfileFormProps {
-  initialData: Employee & {
-    user: User;
-    approver: Employee | null;
+  initialData: User & {
+    approver: User | null;
     subordinates: {
       id: string;
       firstName: string;
       lastName: string;
-      position: string;
+      position: string | null;
     }[];
   };
 }
@@ -91,8 +90,8 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
       firstName: initialData.firstName,
       lastName: initialData.lastName,
       email: initialData.email,
-      department: initialData.department,
-      position: initialData.position,
+      department: initialData.department || "",
+      position: initialData.position || "",
       phoneNumber: initialData.contactNo || "",
       emergencyContact: initialData.emergencyContactNo || "",
       address: initialData.address || "",
@@ -146,7 +145,6 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
       setIsLoading(false);
     }
   }
-
 
   return (
     <Tabs defaultValue="general" className="space-y-6">
@@ -216,13 +214,13 @@ export default function ProfileForm({ initialData }: ProfileFormProps) {
                         </Button>
                       </HoverCardTrigger>
                       <HoverCardContent>
-  <div className="flex items-center">
-    <Info className="h-12 w-12 mr-2 text-yellow-600" />
-    <p className="text-sm text-yellow-600">
-      Profile picture upload functionality coming soon
-    </p>
-  </div>
-</HoverCardContent>
+                        <div className="flex items-center">
+                          <Info className="h-12 w-12 mr-2 text-yellow-600" />
+                          <p className="text-sm text-yellow-600">
+                            Profile picture upload functionality coming soon
+                          </p>
+                        </div>
+                      </HoverCardContent>
                     </HoverCard>
                   </div>
                 </div>

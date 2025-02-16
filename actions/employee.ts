@@ -7,7 +7,6 @@ import { EmployeeFormData, EmployeeSchema } from "@/schemas";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 
-
 export async function createEmployee(data: EmployeeFormData) {
   try {
     const validatedFields = EmployeeSchema.safeParse(data);
@@ -33,38 +32,27 @@ export async function createEmployee(data: EmployeeFormData) {
     const hashedPassword = await bcrypt.hash(fields.password, 12);
     
     // Determine the approval level
-    let approvalLevel: ApprovalLevel = ApprovalLevel.USER;
+    let role: ApprovalLevel = ApprovalLevel.USER;
     if (fields.isHR) {
-      approvalLevel = ApprovalLevel.HR;
+      role = ApprovalLevel.HR;
     } else if (fields.isManager) {
-      approvalLevel = ApprovalLevel.SUPERVISOR;
+      role = ApprovalLevel.SUPERVISOR;
     }
 
-    // Create user
+    // Create user with all employee fields
     const user = await prisma.user.create({
       data: {
-        name: `${fields.firstName} ${fields.lastName}`,
+        employeeId: fields.employeeId,
         email: fields.email,
         password: hashedPassword,
-        role: approvalLevel,
-        employeeId: fields.employeeId,
-      },
-    });
-
-    // Create employee
-    const employee = await prisma.employee.create({
-      data: {
-        empId: user.id,
-        employeeId: fields.employeeId,
         firstName: fields.firstName,
         lastName: fields.lastName,
-        email: fields.email,
         department: fields.department,
         position: fields.position,
         isManager: fields.isManager,
         isHR: fields.isHR,
         isTWC: fields.isTWC,
-        approvalLevel: approvalLevel,
+        role,
         approverId: fields.supervisorId || null,
       },
     });
@@ -87,7 +75,7 @@ export async function createEmployee(data: EmployeeFormData) {
 
       await prisma.leaveBalance.create({
         data: {
-          employeeId: employee.id,
+          userId: user.id,
           leaveTypeId: leaveType.id,
           year: currentYear,
           balance: balance,
@@ -98,7 +86,7 @@ export async function createEmployee(data: EmployeeFormData) {
     }
 
     revalidatePath('/dashboard/employee-management');
-    return { success: true, data: { user, employee } };
+    return { success: true, data: { user } };
   } catch (error) {
     console.error('Employee creation error:', error);
     return { success: false, error: "Something went wrong" };
@@ -106,15 +94,15 @@ export async function createEmployee(data: EmployeeFormData) {
 }
 
 export async function getEmployeeWithApproverAndSubordinates() {
-  const user = await auth();
+  const session = await auth();
   
-  if (!user?.user.email) {
+  if (!session?.user.email) {
     throw new Error("Unauthorized");
   }
 
-  const employee = await prisma.employee.findFirst({
+  const employee = await prisma.user.findFirst({
     where: {
-      email: user?.user.email,
+      email: session.user.email,
     },
     include: {
       approver: {
@@ -129,6 +117,9 @@ export async function getEmployeeWithApproverAndSubordinates() {
         },
       },
       subordinates: {
+        where: {
+          isActive: true,
+        },
         select: {
           id: true,
           firstName: true,
@@ -143,4 +134,46 @@ export async function getEmployeeWithApproverAndSubordinates() {
   });
 
   return employee;
+}
+
+export async function getUserWithApproverAndSubordinates(userId: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        approver: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            department: true,
+            position: true,
+            image: true,
+          }
+        },
+        subordinates: {
+          where: {
+            isActive: true,
+          },
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            department: true,
+            position: true,
+            image: true,
+          }
+        }
+      }
+    });
+
+    return user;
+  } catch (error) {
+    console.error('Error fetching user with approver and subordinates:', error);
+    throw new Error('Failed to fetch user details');
+  }
 }

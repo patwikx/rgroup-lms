@@ -112,16 +112,16 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-sm">
-                    {leaveRequest.employee?.firstName} {leaveRequest.employee?.lastName}
+                    {leaveRequest.user?.firstName} {leaveRequest.user?.lastName}
                   </h4>
                   <div className="text-sm text-muted-foreground flex items-center gap-4 mt-0.5">
                     <span className="flex items-center gap-1.5">
                       <Briefcase className="h-3.5 w-3.5" />
-                      {leaveRequest.employee?.position || "N/A"}
+                      {leaveRequest.user?.position || "N/A"}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <MapPin className="h-3.5 w-3.5" />
-                      {leaveRequest.employee?.department || "N/A"}
+                      {leaveRequest.user?.department || "N/A"}
                     </span>
                   </div>
                 </div>
@@ -165,7 +165,7 @@ export function ApprovalDialog({ request, onClose, onApprove, onReject, loading 
 
               <div>
                 <label className="text-sm text-muted-foreground block mb-1">Reason for Leave</label>
-                <div className="text-sm">{leaveRequest.reason || "No reason provided"}</div>
+                <Textarea readOnly>{leaveRequest.reason || "No reason provided"}</Textarea>
               </div>
             </div>
           </div>

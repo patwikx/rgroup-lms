@@ -9,21 +9,21 @@ import { revalidatePath } from "next/cache";
 export async function getPendingApprovals() {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    if (!session?.user?.employeeId) {
       return [];
     }
 
-    const employee = await prisma.employee.findFirst({
-      where: { empId: session.user.id }
+    const user = await prisma.user.findFirst({
+      where: { employeeId: session.user.employeeId }
     });
 
-    if (!employee) {
+    if (!user) {
       return [];
     }
 
     const pendingApprovals = await prisma.leaveApproval.findMany({
       where: {
-        approverId: employee.id,
+        approverId: user.id,
         status: ApprovalStatus.PENDING,
         leaveRequest: {
           status: LeaveStatus.PENDING
@@ -32,7 +32,7 @@ export async function getPendingApprovals() {
       include: {
         leaveRequest: {
           include: {
-            employee: true,
+            user: true,
             leaveType: true,
             approvals: {
               include: {
@@ -69,19 +69,19 @@ export async function updateLeaveApproval({
       return { success: false, error: "Not authenticated" };
     }
 
-    const employee = await prisma.employee.findFirst({
-      where: { empId: session.user.id }
+    const user = await prisma.user.findFirst({
+      where: { employeeId: session.user.employeeId }
     });
 
-    if (!employee) {
-      return { success: false, error: "Employee not found" };
+    if (!user) {
+      return { success: false, error: "user not found" };
     }
 
     // Get the approval with leave request details
     const approval = await prisma.leaveApproval.findFirst({
       where: {
         id: approvalId,
-        approverId: employee.id,
+        approverId: user.id,
         status: ApprovalStatus.PENDING
       },
       include: {

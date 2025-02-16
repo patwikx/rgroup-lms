@@ -7,8 +7,8 @@ interface SubordinatesCardProps {
     firstName: string;
     lastName: string;
     email: string;
-    position: string;
-    department: string;
+    position: string | null;
+    department: string | null;
     image: string | null;
   }[];
 }

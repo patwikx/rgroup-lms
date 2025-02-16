@@ -1,42 +1,40 @@
-
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
 import { auth } from "@/auth"
-import PendingLeaveRequestsTable from "./pending-leave-reqeust-table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
-import { Metadata } from "next";
-
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { InfoIcon } from "lucide-react"
+import { Metadata } from "next"
+import PendingLeaveRequestsTable from "./pending-leave-reqeust-table"
 
 export const metadata: Metadata = {
   title: 'RD Realty Employee Pending Requests',
   description: 'Manage system users and their access',
-};
+}
 
 export default async function PendingLeaveRequestsPage() {
-  const session = await auth();
+  const session = await auth()
 
   if (!session) {
     redirect("/login")
   }
 
-  const userEmail = session.user.email;
+  const userEmail = session.user.email
   if (!userEmail) {
     return <div>User email not found.</div>
   }
 
   const user = await prisma.user.findUnique({
     where: { email: userEmail },
-    include: { employee: true },
   })
 
-  if (!user || !user.employee) {
-    return <div>User or employee not found.</div>
+  if (!user) {
+    return <div>Employee not found.</div>
   }
+
   const pendingLeaveRequests = await prisma.leaveRequest.findMany({
     where: {
-      employeeId: user.employee.id,
+      userId: user.id,
       status: "PENDING",
     },
     include: {
@@ -46,7 +44,7 @@ export default async function PendingLeaveRequestsPage() {
           approver: true,
         },
       },
-      employee: true, // Include the employee relation
+      user: true,
     },
     orderBy: {
       createdAt: "desc",

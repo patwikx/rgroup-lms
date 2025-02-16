@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -36,8 +36,13 @@ export function EmployeeRegistrationDialog() {
       position: "",
       isManager: false,
       isHR: false,
+      isTWC: false,
       supervisorId: undefined,
       role: ApprovalLevel.USER,
+      employeeId: "",
+      contactNo: "",
+      address: "",
+      emergencyContactNo: "",
     },
   });
 
@@ -80,7 +85,7 @@ export function EmployeeRegistrationDialog() {
       setOpen(false); // Close the dialog after successful submission
     } catch (error) {
       toast.error("Something went wrong");
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -108,4 +113,3 @@ export function EmployeeRegistrationDialog() {
     </Dialog>
   );
 }
-

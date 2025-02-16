@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db"
 
 export async function getDepartments() {
-    const departments = await prisma.employee.findMany({
+    const departments = await prisma.user.findMany({
       select: {
         department: true,
       },

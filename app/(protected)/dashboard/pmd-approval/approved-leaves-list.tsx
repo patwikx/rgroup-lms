@@ -50,7 +50,7 @@ export function ApprovedLeavesList({ approvals }: ApprovedLeavesListProps) {
               return (
                 <TableRow key={request.id}>
                   <TableCell className="font-medium">
-                    {request.employee.firstName} {request.employee.lastName}
+                    {request.user.firstName} {request.user.lastName}
                   </TableCell>
                   <TableCell>
                     <Badge variant={request.leaveType.isPaid ? "default" : "secondary"}>

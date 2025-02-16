@@ -21,7 +21,7 @@ export async function getLeaveTypes() {
   }
 }
 
-export async function createInitialLeaveBalances(employeeId: string) {
+export async function createInitialLeaveBalances(userId: string) {
   try {
     const leaveTypes = await prisma.leaveType.findMany();
     const currentYear = new Date().getFullYear();
@@ -30,7 +30,7 @@ export async function createInitialLeaveBalances(employeeId: string) {
       leaveTypes.map((leaveType) =>
         prisma.leaveBalance.create({
           data: {
-            employeeId,
+            userId,
             leaveTypeId: leaveType.id,
             year: currentYear,
             balance: leaveType.annualAllowance,

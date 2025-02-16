@@ -28,7 +28,7 @@ import {
   export async function OvertimeDataTable() {
     try {
       const session = await auth();
-      const employee = session?.user ? await prisma.employee.findFirst({
+      const employee = session?.user ? await prisma.user.findFirst({
         where: { employeeId: session.user.employeeId },
       }) : null
   
@@ -36,7 +36,7 @@ import {
         throw new Error("Employee not found")
       }
   
-      const isSupervisor = employee?.approvalLevel === "SUPERVISOR"
+      const isSupervisor = employee?.role === "SUPERVISOR"
       const myOvertimes = await getMyOvertimeRequests()
       const pendingApprovals = isSupervisor ? await getPendingApprovals() : []
   
@@ -239,7 +239,7 @@ import {
                           >
                             <TableCell className="py-4">
                               <div className="font-medium">
-                                {overtime.employee.firstName} {overtime.employee.lastName}
+                                {overtime.user.firstName} {overtime.user.lastName}
                               </div>
                             </TableCell>
                             <TableCell className="text-muted-foreground">

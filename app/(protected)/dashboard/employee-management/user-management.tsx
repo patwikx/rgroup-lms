@@ -22,7 +22,7 @@ import {
 import { PasswordChangeForm } from './password-change-form';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { MoreVertical, Edit, Key, UserX, UserCheck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2, Search, FileSpreadsheet, Printer, Filter } from 'lucide-react';
+import { MoreVertical, Edit, Key, UserX, UserCheck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2, Search, FileSpreadsheet, Printer } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,10 +36,11 @@ import { LoadingRow } from './loading-row';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { redirect, useRouter } from 'next/navigation';
+import { ApprovalLevel } from '@prisma/client';
 
 interface LeaveBalance {
   id: string;
-  employeeId: string;
+  userId: string;
   leaveTypeId: string;
   year: number;
   balance: number;
@@ -52,30 +53,30 @@ interface LeaveBalance {
   };
 }
 
-interface Employee {
+interface User {
   id: string;
-  empId: string;
   employeeId: string | null;
+  email: string;
   firstName: string;
   lastName: string;
-  email: string;
-  department: string;
-  position: string;
+  image: string | null;
+  contactNo: string | null;
+  address: string | null;
+  emergencyContactNo: string | null;
+  department: string | null;
+  position: string | null;
+  joiningDate: Date;
   isActive: boolean;
+  isManager: boolean;
+  isHR: boolean;
+  isTWC: boolean;
+  role: ApprovalLevel;
+  approverId: string | null;
   approver: {
     firstName: string;
     lastName: string;
-    position: string;
+    position: string | null;
   } | null;
-  approvalLevel: string;
-}
-
-interface User {
-  id: string;
-  name: string | null;
-  email: string;
-  role: string;
-  employee: Employee | null;
   leaveBalances: LeaveBalance[];
 }
 
@@ -99,7 +100,7 @@ export function UserManagement({ initialUsers }: Props) {
 
   const session = useCurrentUser();
 
-  if (!session || session.role !== 'HR') {
+  if (!session || session.role !== ApprovalLevel.HR) {
     redirect('/dashboard');
   }
 
@@ -118,7 +119,7 @@ export function UserManagement({ initialUsers }: Props) {
 
   // Filter users based on search term
   const filteredUsers = optimisticUsers.filter(user => {
-    const fullName = `${user.employee?.firstName} ${user.employee?.lastName}`.toLowerCase();
+    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   });
 
@@ -135,16 +136,19 @@ export function UserManagement({ initialUsers }: Props) {
 
   const handleExportToExcel = () => {
     const data = filteredUsers.map(user => ({
-      'EmployeeID': `${user.employee?.employeeId}`,
-      'Name': `${user.employee?.firstName} ${user.employee?.lastName}`,
+      'EmployeeID': user.employeeId || '',
+      'Name': `${user.firstName} ${user.lastName}`,
       'Email': user.email,
-      'Department': user.employee?.department,
-      'Position': user.employee?.position,
-      'Approver': user.employee?.approver 
-        ? `${user.employee.approver.firstName} ${user.employee.approver.lastName} (${user.employee.approver.position})`
+      'Department': user.department || '',
+      'Position': user.position || '',
+      'Contact': user.contactNo || '',
+      'Emergency Contact': user.emergencyContactNo || '',
+      'Joining Date': user.joiningDate.toLocaleDateString(),
+      'Approver': user.approver 
+        ? `${user.approver.firstName} ${user.approver.lastName} (${user.approver.position || 'No Position'})`
         : 'No approver assigned',
-      'Status': user.employee?.isActive ? 'Active' : 'Inactive',
-      'Approval Level': user.employee?.approvalLevel,
+      'Status': user.isActive ? 'Active' : 'Inactive',
+      'Role': user.role,
       ...Array.from(uniqueLeaveTypes).reduce((acc, type) => ({
         ...acc,
         [type]: getLeaveBalance(user, type)
@@ -281,15 +285,15 @@ export function UserManagement({ initialUsers }: Props) {
                   <tbody>
                       ${filteredUsers.map(user => `
                           <tr>
-                              <td>${user.employee?.employeeId}</td>
-                              <td>${user.employee?.firstName} ${user.employee?.lastName}</td>
+                              <td>${user.employeeId || ''}</td>
+                              <td>${user.firstName} ${user.lastName}</td>
                               <td>${user.email}</td>
-                              <td>${user.employee?.department}</td>
-                              <td>${user.employee?.position}</td>
-                              <td>${user.employee?.approver 
-                                  ? `${user.employee.approver.firstName} ${user.employee.approver.lastName}`
+                              <td>${user.department || ''}</td>
+                              <td>${user.position || ''}</td>
+                              <td>${user.approver 
+                                  ? `${user.approver.firstName} ${user.approver.lastName}`
                                   : 'No approver assigned'}</td>
-                              <td>${user.employee?.isActive ? 'Active' : 'Inactive'}</td>
+                              <td>${user.isActive ? 'Active' : 'Inactive'}</td>
                               ${leaveTypesArray.map(type => 
                                   `<td>${getLeaveBalance(user, type)}</td>`
                               ).join('')}
@@ -318,13 +322,10 @@ export function UserManagement({ initialUsers }: Props) {
       
       if (result.success) {
         setUsers(prevUsers => prevUsers.map(user => {
-          if (user.id === userId && user.employee) {
+          if (user.id === userId) {
             return {
               ...user,
-              employee: {
-                ...user.employee,
-                isActive: !currentStatus
-              }
+              isActive: !currentStatus
             };
           }
           return user;
@@ -420,30 +421,30 @@ export function UserManagement({ initialUsers }: Props) {
                     {currentUsers.map((user) => (
                       <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="max-w-[200px] truncate">
-                          {user.employee?.employeeId}
+                          {user.employeeId}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
                             <span className="font-medium">
-                              {user.employee?.firstName} {user.employee?.lastName}
+                              {user.firstName} {user.lastName}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {user.employee?.position}
+                              {user.position}
                             </span>
                           </div>
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate">
                           {user.email}
                         </TableCell>
-                        <TableCell>{user.employee?.department}</TableCell>
+                        <TableCell>{user.department}</TableCell>
                         <TableCell>
-                          {user.employee?.approver ? (
+                          {user.approver ? (
                             <div className="flex flex-col">
                               <span>
-                                {user.employee.approver.firstName} {user.employee.approver.lastName}
+                                {user.approver.firstName} {user.approver.lastName}
                               </span>
                               <span className="text-xs text-muted-foreground">
-                                {user.employee.approver.position}
+                                {user.approver.position || 'No Position'}
                               </span>
                             </div>
                           ) : (
@@ -454,10 +455,10 @@ export function UserManagement({ initialUsers }: Props) {
                         </TableCell>
                         <TableCell>
                           <Badge 
-                            variant={user.employee?.isActive ? "success" : "destructive"}
+                            variant={user.isActive ? "success" : "destructive"}
                             className="whitespace-nowrap"
                           >
-                            {user.employee?.isActive ? 'Active' : 'Inactive'}
+                            {user.isActive ? 'Active' : 'Inactive'}
                           </Badge>
                         </TableCell>
                         {Array.from(uniqueLeaveTypes).map(type => (
@@ -492,19 +493,16 @@ export function UserManagement({ initialUsers }: Props) {
                                 Change Password
                               </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleStatusToggle(
-                                  user.id,
-                                  user.employee?.isActive || false
-                                )}
+                                onClick={() => handleStatusToggle(user.id, user.isActive)}
                                 disabled={isStatusLoading === user.id}
-                                className={user.employee?.isActive ? "text-destructive" : "text-success"}
+                                className={user.isActive ? "text-destructive" : "text-success"}
                               >
                                 {isStatusLoading === user.id ? (
                                   <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Updating...
                                   </>
-                                ) : user.employee?.isActive ? (
+                                ) : user.isActive ? (
                                   <>
                                     <UserX className="mr-2 h-4 w-4" />
                                     Deactivate
@@ -581,10 +579,22 @@ export function UserManagement({ initialUsers }: Props) {
           <DialogHeader>
             <DialogTitle>Edit User Details</DialogTitle>
           </DialogHeader>
-          <UserDetailsForm 
-            user={selectedUser} 
-            onSuccess={handleUserUpdate}
-          />
+          {selectedUser && (
+            <UserDetailsForm 
+              user={{
+                id: selectedUser.id,
+                firstName: selectedUser.firstName,
+                lastName: selectedUser.lastName,
+                email: selectedUser.email,
+                department: selectedUser.department || undefined,
+                position: selectedUser.position || undefined,
+                approverId: selectedUser.approverId || undefined,
+                role: selectedUser.role,
+                approver: selectedUser.approver
+              }}
+              onSuccess={handleUserUpdate}
+            />
+          )}
         </DialogContent>
       </Dialog>
 
@@ -593,13 +603,15 @@ export function UserManagement({ initialUsers }: Props) {
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
           </DialogHeader>
-          <PasswordChangeForm
-            userId={selectedUser?.id}
-            onSuccess={() => {
-              setIsPasswordOpen(false);
-              setSelectedUser(null);
-            }}
-          />
+          {selectedUser && (
+            <PasswordChangeForm
+              userId={selectedUser.id}
+              onSuccess={() => {
+                setIsPasswordOpen(false);
+                setSelectedUser(null);
+              }}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>

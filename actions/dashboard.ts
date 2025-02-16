@@ -8,8 +8,8 @@ export async function getDashboardStats() {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
 
-  const employee = await prisma.employee.findUnique({
-    where: { empId: session.user.id }
+  const employee = await prisma.user.findUnique({
+    where: { employeeId: session.user.employeeId }
   });
   if (!employee) throw new Error('Employee not found');
 
@@ -17,7 +17,7 @@ export async function getDashboardStats() {
 
   const leaveBalances = await prisma.leaveBalance.findMany({
     where: {
-      employeeId: employee.id,
+      userId: employee.id,
       year: currentYear,
       leaveType: {
         name: { in: ['ML', 'SL', 'VL'] }
@@ -38,14 +38,14 @@ export async function getDashboardStats() {
 
   const pendingRequests = await prisma.leaveRequest.count({
     where: {
-      employeeId: employee.id,
+      userId: employee.id,
       status: 'PENDING'
     }
   });
 
   const approvedLeaves = await prisma.leaveRequest.count({
     where: {
-      employeeId: employee.id,
+      userId: employee.id,
       status: 'APPROVED'
     }
   });

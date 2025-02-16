@@ -9,27 +9,23 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import type { LeaveApproval, LeaveRequest, Employee, LeaveType } from '@prisma/client';
+import { PendingApprovalWithDetails } from '@/types/type';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { Badge } from '@/components/ui/badge';
 import { Eye } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { ApprovalLevel } from '@prisma/client';
 
 interface ApprovalQueueProps {
-  approvals: (LeaveApproval & {
-    leaveRequest: LeaveRequest & {
-      employee: Employee;
-      leaveType: LeaveType;
-    };
-  })[];
+  approvals: PendingApprovalWithDetails[];
 }
 
 export function ApprovalQueue({ approvals }: ApprovalQueueProps) {
   const user = useCurrentUser();
   const router = useRouter();
 
-  const isApprover = user?.role === 'SUPERVISOR';
-  const isHR = user?.role === 'HR';
+  const isApprover = user?.role === ApprovalLevel.SUPERVISOR;
+  const isHR = user?.role === ApprovalLevel.HR;
 
   if (!isApprover && !isHR) {
     return null; // Do not render the card if the user is not a supervisor or HR
@@ -42,7 +38,12 @@ export function ApprovalQueue({ approvals }: ApprovalQueueProps) {
           <CardTitle>Pending Approvals</CardTitle>
           <CardDescription>Leave requests requiring your approval</CardDescription>
         </div>
-        <Button variant="outline" onClick={() => router.push('/dashboard/approvals')}><Eye className='h-4 w-4 mr-2' />View All</Button>
+        <Button 
+          variant="outline" 
+          onClick={() => router.push('/dashboard/approvals')}
+        >
+          <Eye className='h-4 w-4 mr-2' />View All
+        </Button>
       </CardHeader>
       <CardContent className="space-y-4">
         {approvals.map((approval) => (
@@ -52,8 +53,8 @@ export function ApprovalQueue({ approvals }: ApprovalQueueProps) {
           >
             <div className="space-y-1">
               <p className="font-medium">
-                {approval.leaveRequest.employee.firstName}{' '}
-                {approval.leaveRequest.employee.lastName}
+                {approval.leaveRequest.user.firstName}{' '}
+                {approval.leaveRequest.user.lastName}
               </p>
               <p className="text-sm text-muted-foreground">
                 {format(new Date(approval.leaveRequest.startDate), 'PP')} -{' '}

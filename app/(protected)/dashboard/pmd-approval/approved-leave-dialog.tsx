@@ -96,16 +96,16 @@ export function ApprovedLeaveDialog({ request, onClose }: ApprovedLeaveDialogPro
               <User className="h-5 w-5 text-primary" />
               <div className="flex-1">
                 <p className="font-medium">
-                  {request.employee.firstName} {request.employee.lastName}
+                  {request.user.firstName} {request.user.lastName}
                 </p>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                   <span className="flex items-center gap-1">
                     <Briefcase className="h-4 w-4" />
-                    {request.employee.position}
+                    {request.user.position}
                   </span>
                   <span className="flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    {request.employee.department}
+                    {request.user.department}
                   </span>
                 </div>
               </div>
@@ -159,7 +159,7 @@ export function ApprovedLeaveDialog({ request, onClose }: ApprovedLeaveDialogPro
 
               {supervisorApproval && (
                 <div className="grid grid-cols-[auto,1fr] gap-x-4 text-sm">
-                  <div className="font-medium">Supervisor:</div>
+                  <div className="font-medium">Approver:</div>
                   <div>{supervisorApproval.approver.firstName} {supervisorApproval.approver.lastName}</div>
                   {supervisorApproval.comment && (
                     <>

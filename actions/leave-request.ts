@@ -21,17 +21,17 @@ export async function createLeaveRequest(data: FormData) {
       return { success: false, error: "Not authenticated" };
     }
 
-    const employee = await prisma.employee.findFirst({
-      where: { empId: session.user.id },
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
       include: { approver: true },
     });
 
-    if (!employee) {
-      return { success: false, error: "Employee not found" };
+    if (!user) {
+      return { success: false, error: "User not found" };
     }
 
-    if (!employee.approverId) {
-      return { success: false, error: "No approver assigned to this employee" };
+    if (!user.approverId) {
+      return { success: false, error: "No approver assigned to this user" };
     }
 
     // Get the raw date strings from FormData
@@ -72,7 +72,7 @@ export async function createLeaveRequest(data: FormData) {
     const currentYear = new Date().getFullYear();
     const leaveBalance = await prisma.leaveBalance.findFirst({
       where: {
-        employeeId: employee.id,
+        userId: user.id,
         leaveTypeId: fields.leaveTypeId as string,
         year: currentYear
       }
@@ -92,7 +92,7 @@ export async function createLeaveRequest(data: FormData) {
       // Create leave request with initial supervisor approval
       prisma.leaveRequest.create({
         data: {
-          employeeId: employee.id,
+          userId: user.id,
           leaveTypeId: fields.leaveTypeId as string,
           startDate: fields.startDate,
           endDate: fields.endDate,
@@ -103,8 +103,8 @@ export async function createLeaveRequest(data: FormData) {
           approvals: {
             create: [
               {
-                approverId: employee.approverId,
-                level: employee.approver?.approvalLevel || ApprovalLevel.SUPERVISOR,
+                approverId: user.approverId,
+                level: user.approver?.role || ApprovalLevel.SUPERVISOR,
                 status: ApprovalStatus.PENDING,
               },
             ],

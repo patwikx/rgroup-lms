@@ -64,7 +64,7 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
 
   // Filter requests based on search term, status, and date range
   const filteredRequests = requests.filter(request => {
-    const fullName = `${request.employee.firstName} ${request.employee.lastName}`.toLowerCase();
+    const fullName = `${request.user.firstName} ${request.user.lastName}`.toLowerCase();
     const matchesSearch = fullName.includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'ALL' || request.status === statusFilter;
     
@@ -104,9 +104,9 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
 
   const handleExportToExcel = () => {
     const data = filteredRequests.map(request => ({
-      'Employee': `${request.employee.firstName} ${request.employee.lastName}`,
-      'Department': request.employee.department,
-      'Position': request.employee.position,
+      'Employee': `${request.user.firstName} ${request.user.lastName}`,
+      'Department': request.user.department,
+      'Position': request.user.position,
       'Leave Type': request.leaveType.name,
       'Start Date': format(new Date(request.startDate), 'PP'),
       'End Date': format(new Date(request.endDate), 'PP'),
@@ -117,8 +117,8 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
       'Rejection Reason': request.rejectionReason || 'N/A',
       'PMD Rejection Reason': request.pmdRejectionReason || 'N/A',
       'Approver Remarks': getLatestApprovalComment(request.approvals),
-      'Approver': request.employee.approver 
-        ? `${request.employee.approver.firstName} ${request.employee.approver.lastName}`
+      'Approver': request.user.approver 
+        ? `${request.user.approver.firstName} ${request.user.approver.lastName}`
         : 'N/A',
       'Created At': format(new Date(request.createdAt), 'PPpp'),
     }));
@@ -248,20 +248,20 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentRequests.map((request: { id: string, employee: any, leaveType: any, startDate: string, endDate: string, daysRequested: number, pmdRejectionReason: string, approvals: any[], status: keyof typeof statusColors, pmdStatus: keyof typeof statusColors, createdAt: string }) => (
+                  {currentRequests.map((request: { id: string, user: any, leaveType: any, startDate: string, endDate: string, daysRequested: number, pmdRejectionReason: string, approvals: any[], status: keyof typeof statusColors, pmdStatus: keyof typeof statusColors, createdAt: string }) => (
                     <TableRow key={request.id} className="hover:bg-muted/50 transition-colors">
-                      <TableCell>{request.employee.employeeId}</TableCell>
+                      <TableCell>{request.user.employeeId}</TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {request.employee.firstName} {request.employee.lastName}
+                            {request.user.firstName} {request.user.lastName}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {request.employee.position}
+                            {request.user.position}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>{request.employee.department}</TableCell>
+                      <TableCell>{request.user.department}</TableCell>
                       <TableCell><Badge>{request.leaveType.name}</Badge></TableCell>
                       <TableCell>
                         <div className="flex flex-col">
@@ -297,13 +297,13 @@ export function LeaveRequestsReport({ initialRequests }: { initialRequests: any[
                         </span>
                       </TableCell>
                       <TableCell>
-                        {request.employee.approver ? (
+                        {request.user.approver ? (
                           <div className="flex flex-col">
                             <span>
-                              {request.employee.approver.firstName} {request.employee.approver.lastName}
+                              {request.user.approver.firstName} {request.user.approver.lastName}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {request.employee.approver.position}
+                              {request.user.approver.position}
                             </span>
                           </div>
                         ) : (

@@ -27,7 +27,7 @@ export default async function LeaveSettingsPage() {
   const leaveBalances = await prisma.leaveBalance.findMany({
     where: { year: currentYear },
     include: {
-      employee: {
+      user: {
         select: {
           employeeId: true,
           firstName: true,
@@ -41,7 +41,7 @@ export default async function LeaveSettingsPage() {
       },
     },
     orderBy: [
-      { employee: { firstName: "asc" } },
+      { user: { firstName: "asc" } },
       { leaveType: { name: "asc" } },
     ],
   });
