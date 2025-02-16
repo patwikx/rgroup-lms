@@ -25,19 +25,19 @@ export const balanceColumns: ColumnDef<any>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "employee.employeeId",
+    accessorKey: "user.employeeId",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="First Name" />
     ),
   },
   {
-    accessorKey: "employee.firstName",
+    accessorKey: "user.firstName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="First Name" />
     ),
   },
   {
-    accessorKey: "employee.lastName",
+    accessorKey: "user.lastName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Last Name" />
     ),
