@@ -10,8 +10,8 @@ import { Analytics } from "@vercel/analytics/react"
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'RDHFSI LMS',
-  description: 'RDHFSI Leave Management System',
+  title: 'RD Realty Group LMS',
+  description: 'RD Realty Group Leave Management System',
 }
 
 export default async function RootLayout({

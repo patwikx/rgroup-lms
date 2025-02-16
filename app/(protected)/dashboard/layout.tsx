@@ -7,8 +7,8 @@ import { Toaster } from '@/components/ui/toaster'
 import Header from '@/components/header/header';
 
 export const metadata = {
-  title: 'RDHFSI LMS',
-  description: 'RDHFSI Leave Management System',
+  title: 'RD Realty Group LMS',
+  description: 'RD Realty Group Leave Management System',
 }
 
 
