@@ -3,8 +3,8 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { Menu, ChevronDown, FileText, CalendarCheck, FileArchive, Settings, Users2, History, LogOut, Timer } from 'lucide-react'
+import { usePathname, useRouter } from "next/navigation"
+import { Menu, ChevronDown, FileText, CalendarCheck, FileArchive, Settings, Users2, History, LogOut, Timer, Home } from 'lucide-react'
 import { signOut } from "next-auth/react"
 
 import { cn } from "@/lib/utils"
@@ -20,8 +20,10 @@ import {
 import { useCurrentUser } from "@/hooks/use-current-user"
 
 export function SideBarNav() {
+  const [open, setOpen] = React.useState(false)
   const user = useCurrentUser();
   const pathname = usePathname()
+  const router = useRouter()
 
   if (!user) return null
 
@@ -32,6 +34,12 @@ export function SideBarNav() {
     {
       title: 'Main Menu',
       items: [
+        {
+          href: "/dashboard",
+          label: 'Home',
+          icon: Home,
+          description: "Go to dashboard"
+        },
         {
           href: "/dashboard/pending-requests",
           label: 'Pending Leave Requests',
@@ -111,8 +119,13 @@ export function SideBarNav() {
     }] : []),
   ]
 
+  const handleNavigation = (href: string) => {
+    setOpen(false)
+    router.push(href)
+  }
+
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
           variant="ghost"
@@ -160,6 +173,7 @@ export function SideBarNav() {
                             isActive ? "bg-accent/60 text-accent-foreground shadow-sm" : "text-muted-foreground",
                             "transition-all duration-200 ease-in-out"
                           )}
+                          onClick={() => handleNavigation(item.href)}
                         >
                           <Icon className={cn(
                             "mr-3 h-5 w-5",
@@ -185,12 +199,12 @@ export function SideBarNav() {
               <Avatar className="h-9 w-9">
                 <AvatarFallback>
                   {user.name
-                    ? user.name.split(' ').map(n => n[0]).join('').toUpperCase()
+                    ? user.firstName.split(' ').map(n => n[0]).join('').toUpperCase()
                     : '??'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
-                <span className="text-sm font-medium">{user.name}</span>
+                <span className="text-sm font-medium">{user.firstName} {user.lastName}</span>
                 <span className="text-xs text-muted-foreground">{user.email}</span>
               </div>
             </div>

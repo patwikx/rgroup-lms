@@ -12,7 +12,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { CalendarCheck, FileArchive, FileTextIcon, History, HistoryIcon, Settings, Users2, Users2Icon } from "lucide-react"
+import { CalendarCheck, FileArchive, FileTextIcon, History, HistoryIcon, Home, Settings, Users2, Users2Icon } from "lucide-react"
 import { useCurrentUser } from "@/hooks/use-current-user"
 import TeamSwitcher from "./team-switcher"
 
@@ -31,6 +31,13 @@ export function SystemMenu() {
       <NavigationMenuList>
         <NavigationMenuItem>
         <TeamSwitcher />
+        </NavigationMenuItem>
+        <NavigationMenuItem className="ml-4">
+          <Link href="/dashboard" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              <Home className="h-4 w-4 mr-2"/>Home
+            </NavigationMenuLink>
+          </Link>
         </NavigationMenuItem>
         <NavigationMenuItem className="ml-4">
           <Link href="/dashboard/pending-requests" legacyBehavior passHref>

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Activity, CalendarCheck, FileText, History, ChevronDown, Settings, Users2, FileArchive, AlertCircle, TimerIcon } from 'lucide-react';
+import { Activity, CalendarCheck, FileText, History, ChevronDown, Settings, Users2, FileArchive, AlertCircle, TimerIcon, Home } from 'lucide-react';
 
 import { cn } from "@/lib/utils"
 import {
@@ -33,6 +33,12 @@ export function MainNav({
   const isHR = user.role === 'HR';
 
   const routes = [
+    {
+      href: `/dashboard`,
+      label: 'Home',
+      icon: Home, // Choose an appropriate icon for the dashboard
+      active: pathname === `/dashboard`,
+    },
     {
       href: `/dashboard/pending-requests`,
       label: 'Pending Leave Requests',
