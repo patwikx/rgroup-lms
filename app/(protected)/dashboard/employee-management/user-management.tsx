@@ -266,7 +266,7 @@ export function UserManagement({ initialUsers }: Props) {
       <body>
           <div class="container">
               <div class="header">
-                  <h1>RD HARDWARE & FISHING SUPPLY, INC.</h1>
+                  <h1>RD REALTY GROUP</h1>
                   <h2>LEAVE MANAGEMENT SYSTEM - EMPLOYEE REPORT</h2>
               </div>
               <table>
