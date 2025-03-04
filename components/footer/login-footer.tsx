@@ -12,7 +12,7 @@ export function HomepageFooter() {
       <div className="container h-full flex items-center">
         <div className="flex-1 flex justify-center items-center gap-2">
           <p className="text-xs text-muted-foreground">
-            © {currentYear} RDHFSI LMS
+            © {currentYear} RD Realty Group LMS
           </p>
           <span className="text-xs text-muted-foreground mx-1">•</span>
           <p className="text-xs text-muted-foreground">

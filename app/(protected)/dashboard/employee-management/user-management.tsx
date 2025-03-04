@@ -22,7 +22,7 @@ import {
 import { PasswordChangeForm } from './password-change-form';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { MoreVertical, Edit, Key, UserX, UserCheck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2, Search, FileSpreadsheet, Printer } from 'lucide-react';
+import { MoreVertical, Edit, Key, UserX, UserCheck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2, Search, FileSpreadsheet, Printer, Filter } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +37,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useCurrentUser } from '@/hooks/use-current-user';
 import { redirect, useRouter } from 'next/navigation';
 import { ApprovalLevel } from '@prisma/client';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface LeaveBalance {
   id: string;
@@ -97,6 +104,7 @@ export function UserManagement({ initialUsers }: Props) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isStatusLoading, setIsStatusLoading] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [twcFilter, setTwcFilter] = useState<string>('all');
 
   const session = useCurrentUser();
 
@@ -117,10 +125,19 @@ export function UserManagement({ initialUsers }: Props) {
     )
   );
 
-  // Filter users based on search term
+  // Filter users based on search term and TWC status
   const filteredUsers = optimisticUsers.filter(user => {
     const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-    return fullName.includes(searchTerm.toLowerCase());
+    const matchesSearch = fullName.includes(searchTerm.toLowerCase());
+    
+    // Apply TWC filter
+    if (twcFilter === 'all') {
+      return matchesSearch;
+    } else if (twcFilter === 'twc') {
+      return matchesSearch && user.isTWC;
+    } else {
+      return matchesSearch && !user.isTWC;
+    }
   });
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
@@ -149,6 +166,7 @@ export function UserManagement({ initialUsers }: Props) {
         : 'No approver assigned',
       'Status': user.isActive ? 'Active' : 'Inactive',
       'Role': user.role,
+      'TWC': user.isTWC ? 'Yes' : 'No',
       ...Array.from(uniqueLeaveTypes).reduce((acc, type) => ({
         ...acc,
         [type]: getLeaveBalance(user, type)
@@ -279,6 +297,7 @@ export function UserManagement({ initialUsers }: Props) {
                           <th>Position</th>
                           <th>Approver</th>
                           <th>Status</th>
+                          <th>TWC</th>
                           ${leaveTypesArray.map(type => `<th>${type}</th>`).join('')}
                       </tr>
                   </thead>
@@ -294,6 +313,7 @@ export function UserManagement({ initialUsers }: Props) {
                                   ? `${user.approver.firstName} ${user.approver.lastName}`
                                   : 'No approver assigned'}</td>
                               <td>${user.isActive ? 'Active' : 'Inactive'}</td>
+                              <td>${user.isTWC ? 'Yes' : 'No'}</td>
                               ${leaveTypesArray.map(type => 
                                   `<td>${getLeaveBalance(user, type)}</td>`
                               ).join('')}
@@ -370,6 +390,24 @@ export function UserManagement({ initialUsers }: Props) {
             />
             <Search className="h-4 w-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500" />
           </div>
+          <div className="flex items-center gap-2">
+            <Select
+              value={twcFilter}
+              onValueChange={setTwcFilter}
+            >
+              <SelectTrigger className="w-[140px]">
+                <div className="flex items-center">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="TWC Status" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Users</SelectItem>
+                <SelectItem value="twc">TWC Only</SelectItem>
+                <SelectItem value="non-twc">Non-TWC</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button
             variant="outline"
             size="sm"
@@ -404,6 +442,7 @@ export function UserManagement({ initialUsers }: Props) {
                     <TableHead className="bg-muted/50 font-semibold">Department</TableHead>
                     <TableHead className="bg-muted/50 font-semibold">Approver</TableHead>
                     <TableHead className="bg-muted/50 font-semibold">Status</TableHead>
+                    <TableHead className="bg-muted/50 font-semibold">TWC</TableHead>
                     {Array.from(uniqueLeaveTypes).map(type => (
                       <TableHead key={type} className="bg-muted/50 font-semibold">{type}</TableHead>
                     ))}
@@ -414,7 +453,7 @@ export function UserManagement({ initialUsers }: Props) {
                   <Suspense fallback={
                     <>
                       {[...Array(ITEMS_PER_PAGE)].map((_, i) => (
-                        <LoadingRow key={i} columns={7 + uniqueLeaveTypes.size} />
+                        <LoadingRow key={i} columns={8 + uniqueLeaveTypes.size} />
                       ))}
                     </>
                   }>
@@ -459,6 +498,14 @@ export function UserManagement({ initialUsers }: Props) {
                             className="whitespace-nowrap"
                           >
                             {user.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={user.isTWC ? "default" : "outline"}
+                            className="whitespace-nowrap"
+                          >
+                            {user.isTWC ? 'Yes' : 'No'}
                           </Badge>
                         </TableCell>
                         {Array.from(uniqueLeaveTypes).map(type => (
